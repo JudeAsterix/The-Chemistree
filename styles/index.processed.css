@@ -1,0 +1,21 @@
+/**
+ * index.scss
+ * - Add any styles you want here!
+ */
+body {
+  background: #244d51;
+  padding: 0;
+  margin: 0;
+}
+
+#canvas {
+  background: blue;
+  position: absolute;
+  left: 50%;
+  margin-left: -540px;
+  margin-top: 20px;
+}
+
+#canvasDiv {
+  width: 100%;
+}

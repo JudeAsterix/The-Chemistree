@@ -1,0 +1,28 @@
+/**
+ * index.scss
+ * - Add any styles you want here!
+ */
+
+body {
+  background:rgb(36, 77, 81);
+	padding:0;
+	margin:0;
+}
+
+#canvas{
+	background:blue;
+	position:absolute;
+	left:50%;
+	margin-left:-540px;
+	margin-top:20px;
+}
+
+#canvasDiv
+{
+	width: 100%;
+}
+
+img
+{
+	width: 1000px;
+}
