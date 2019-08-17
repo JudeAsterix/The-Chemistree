@@ -15,6 +15,7 @@ function initialise() {
 	canDiv.addEventListener("click", clickReporter, false);
 	canDiv.addEventListener("mousemove", mouseOverReporter, false);
 	canDiv.addEventListener("mouseout", mouseOutReporter, false);
+	canDiv.addEventListener("wheel", mouseWheelReporter, false);
 	timer = setInterval(draw, 100);
 	return timer;
 }
@@ -26,7 +27,10 @@ function initialise() {
 
 function clickReporter(event)
 {
-	
+	var rect = canDiv.getBoundingClientRect();
+	mouseX = event.clientX - rect.left;
+	mouseY = event.clientY - rect.top;
+	screen2.clickUpdate(mouseX, mouseY);
 }
 
 function mouseOverReporter(event)
@@ -40,6 +44,12 @@ function mouseOverReporter(event)
 function mouseOutReporter(event)
 {
 	menu.update(-464, -4646, true);
+}
+
+function mouseWheelReporter(event)
+{
+	console.log(event);
+	console.log("Hey!");
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -77,36 +87,48 @@ function Entity(x, y, width, height, color)
 
 function Screen(type)
 {
+	this.isShown = false;
 	this.type = type; // 0 = Title Screen | 1 = Road Map Screen | 2 = Search Screen
-	this.entities = []
+	this.entities = [];
+	this.droppedDown;
 	this.verticalShift = 0;
-	Entity.call(this, 0, 0, canDiv.height, canDiv.width, "rgb(109, 137, 107)");
+	Entity.call(this, 0, 0, canDiv.height, canDiv.width, "rgb(109, 137, 107)");	
 	
 	if(this.type == 0)
 	{
+		this.droppedDown = false;
 		this.entities.push(new Logo());
-		this.entities.push(new Menu());
 	}
 	else if(this.type == 1)
 	{
 		var nodes = [];
-		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)"));
+		var lines = [];
+		this.droppedDown = true;
+		
+		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)", "the", "one"));
+		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "two"));
+		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "three"));
+		
+		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "Williamson Synthesis"));
+		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "Hydrolysis of Alkyl Halide"));
+		/*nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)"));
 		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)"));
 		nodes.push(new RoadMapNode(500, 350, "rgb(0, 200, 200)"));
 		nodes.push(new RoadMapNode(600, 250, "rgb(0, 200, 200)"));
 		nodes.push(new RoadMapNode(550, 400, "rgb(0, 200, 200)"));
 		nodes.push(new RoadMapNode(700, 375, "rgb(0, 200, 200)"));
 		
-		var lines = [];
 		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "yes"));
 		lines.push(new RoadMapLine(nodes[2], nodes[3], "blue", "yes"));
 		lines.push(new RoadMapLine(nodes[4], nodes[3], "red", "yes"));
 		lines.push(new RoadMapLine(nodes[3], nodes[5], "purple", "yes"));
-		lines.push(new RoadMapLine(nodes[1], nodes[5], "green", "yes"));
+		lines.push(new RoadMapLine(nodes[1], nodes[5], "green", "yes"));*/
 		
 		this.entities.push(new RoadMap(nodes, lines));
+		
+		this.isShown = true;
 	}
-	
+	this.entities.push(new Menu());
 	this.draw = function()
 	{
 		var frontGrad = context.createLinearGradient(0, 0, 0, 360);
@@ -137,6 +159,11 @@ function Screen(type)
 			this.entities[i].update(mouseX, mouseY, mouseOver);
 		}
 	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -164,7 +191,8 @@ function Menu()
 		context.fillRect(this.x, this.y, this.width / 15, this.height);
 		context.fillStyle ="rgb(40, 66, 51)";
 		context.font = "20px Arial";
-		context.fillText("V", 30, 20);
+		context.textAlign = "center";
+		context.fillText("V", this.width / 30, 20);
 		
 	}
 	
@@ -275,14 +303,16 @@ function Logo()
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
-function RoadMapNode(x, y, color, name)
+function RoadMapNode(x, y, color, name, imageId) // ----This is the node class----
 {
 	Entity.call(this, x, y, 10, 10, color);
+	this.nodeImage = document.getElementById(imageId);
 	this.color = color;
 	this.offsetX = 0;
 	this.offsetY = 0;
 	this.name = name;
 	this.clicked = false;
+	this.map = new RoadMap([], []);
 	
 	const SMALL_SIZE = 10;
 	const BIG_SIZE = 20;
@@ -291,10 +321,16 @@ function RoadMapNode(x, y, color, name)
 	{
 		context.fillStyle = this.color;	
 		context.beginPath();
-		context.arc(this.x + this.offsetX, this.y + this.offsetY, this.width, this.height, 0, 2* Math.PI);
+		context.arc((this.x + this.offsetX) * this.map.zoom, (this.y + this.offsetY) * this.map.zoom, this.width, this.height, 0, 2* Math.PI);
 		context.fill();
+		context.drawImage(this.nodeImage, (((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom), ((this.y + this.offsetY)- (this.nodeImage.height / 2)) * this.map.zoom, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
 	}
 	
+	this.getMap = function(nodeMap)
+	{
+		this.map = nodeMap;
+	}
+		
 	this.update = function(mouseX, mouseY, mouseOut)
 	{
 		if(this.inTheCircle(mouseX, mouseY))
@@ -318,8 +354,8 @@ function RoadMapNode(x, y, color, name)
 	
 	this.inTheCircle = function(mouseX, mouseY)
 	{
-		var dotX = this.x + this.offsetX;
-		var dotY = this.y + this.offsetY;
+		var dotX = (this.x + this.offsetX) * this.map.zoom;
+		var dotY = (this.y + this.offsetY) * this.map.zoom;
 		
 		var distance = Math.sqrt(Math.pow((dotX - mouseX), 2) + Math.pow((dotY - mouseY), 2));
 		
@@ -334,13 +370,15 @@ function RoadMapNode(x, y, color, name)
 	}
 }
 
-function RoadMapLine(nodeFrom, nodeTo, color, name)
+function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 {
 	Entity.call(this, -1, -1, 10, 10, color);
+	this.roadMap = new RoadMap([], []);
 	this.nodeFrom = nodeFrom;
 	this.nodeTo = nodeTo;
 	this.name = name;
 	this.color = color;
+	this.map = new RoadMap([], []);
 	
 	this.draw = function()
 	{
@@ -352,20 +390,44 @@ function RoadMapLine(nodeFrom, nodeTo, color, name)
 		var widthDiff = toX - fromX;
 		var heightDiff = toY - fromY;
 		
-		var deg = Math.atan(heightDiff / widthDiff) / (Math.PI / 180);
+		var deg = Math.atan(heightDiff / widthDiff);
 		
 		context.lineWidth = 5;
 		context.strokeStyle = this.color;
-		//context.beginPath();
-		//context.moveTo(fromX, fromY);
-		//context.lineTo(toX, toY);
-		//context.stroke();
 		context.fillStyle = this.color;
 		context.beginPath();
-		context.moveTo(fromX, fromY);
-		context.lineTo(toX - Math.round(5 * Math.cos((deg + 90) * (Math.PI / 180))), toY - Math.round(5 * Math.sin((deg + 90) * (Math.PI / 180))));
-		context.lineTo(toX - Math.round(5 * Math.cos((deg - 90) * (Math.PI / 180))), toY - Math.round(5 * Math.sin((deg - 90) * (Math.PI / 180))));
+		context.moveTo(toX * this.map.zoom, toY * this.map.zoom);
+		context.lineTo((fromX - this.getTrigPosition(false, deg, 1)) * this.map.zoom, (fromY - this.getTrigPosition(true, deg, 1)) * this.map.zoom);
+		context.lineTo((fromX - this.getTrigPosition(false, deg, -1)) * this.map.zoom, (fromY - this.getTrigPosition(true, deg, -1)) * this.map.zoom);
 		context.fill();
+		
+		context.translate((fromX + toX) / 2 * this.map.zoom , (fromY + toY) / 2 * this.map.zoom);
+		context.rotate(deg);
+		context.translate(0, -20);
+		context.font = "16px Tahoma";
+		context.fillStyle = "black";
+		context.textAlign = "center";
+		context.fillText(this.name, 0, 0);
+		context.translate(0, 20);
+		context.rotate(-deg);
+		context.translate(-(fromX + toX) / 2 * this.map.zoom, -(fromY + toY) / 2 * this.map.zoom);
+	}
+	
+	this.getTrigPosition = function(isSin, deg, plusOrMinus)
+	{
+		if(isSin == true)
+		{
+			return (Math.round(this.nodeFrom.height / 2 * Math.sin((deg + (plusOrMinus * 90)))));
+		}
+		else
+		{
+			return (Math.round(this.nodeFrom.height / 2 * Math.cos((deg + (plusOrMinus * 90)))));
+		}
+	}
+	
+	this.getMap = function(nodeMap)
+	{
+		this.map = nodeMap;
 	}
 }
 
@@ -375,6 +437,20 @@ function RoadMap(nodes, lines)
 	this.numberOfNodes = nodes.length;
 	this.lines = lines;
 	this.numberOfLines = lines.length;
+	this.zoom = 1.5;
+	
+	this.init = function()
+	{
+		for(var i = 0; i < this.nodes.length; i++)
+		{
+			this.nodes[i].getMap(this);
+		}
+		
+		for(var i = 0; i < thislines.length; i++)
+		{
+			this.lines[i].getMap(this);
+		}
+	}
 	
 	this.draw = function()
 	{
@@ -398,5 +474,14 @@ function RoadMap(nodes, lines)
 	}
 }
 
+/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  =            This section is for the info section              =
+  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+*/
+
+function InfoScreen(x, y)
+{
+	Entity.Call(this, )
+}
 
 setInterval(draw, 50);
