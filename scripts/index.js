@@ -2,20 +2,34 @@ var canDiv = document.getElementById("canvas");
 var context = canDiv.getContext("2d");
 var screen1 = new Screen(0);
 var screen2 = new Screen(1);
+
+var mouseDown = false;
+var mouseOnNode = false;
+var mouseOnLine = false;
 var mouseX = 0;
 var mouseY = 0;
+
+var dragX = 0;
+var dragY = 0;
+
 var onScreen = false;
 var menu = new Menu();
-canDiv.height = 720;
-canDiv.width = 1080;
 var temp = 10;
 var timer;
 
+const HEIGHT = 720;
+const WIDTH = 1080;
+
+canDiv.height = HEIGHT;
+canDiv.width = WIDTH;
+
 function initialise() {
 	canDiv.addEventListener("click", clickReporter, false);
-	canDiv.addEventListener("mousemove", mouseOverReporter, false);
+	canDiv.addEventListener("mousemove", mouseMoveReporter, false);
 	canDiv.addEventListener("mouseout", mouseOutReporter, false);
-	canDiv.addEventListener("wheel", mouseWheelReporter, false);
+	canDiv.addEventListener("mousewheel", mouseWheelReporter, false);
+	canDiv.addEventListener("mousedown", mouseDownReporter, false);
+	canDiv.addEventListener("mouseup", mouseUpReporter, false);
 	timer = setInterval(draw, 100);
 	return timer;
 }
@@ -33,12 +47,18 @@ function clickReporter(event)
 	screen2.clickUpdate(mouseX, mouseY);
 }
 
-function mouseOverReporter(event)
+function mouseMoveReporter(event)
 {
 	var rect = canDiv.getBoundingClientRect();
 	mouseX = event.clientX - rect.left;
 	mouseY = event.clientY - rect.top;
 	onScreen = false;
+	
+	if(mouseDown)
+	{
+		var temp = screen2.entities[0];
+		temp.changeGlobalOffset(-dragX + mouseX, -dragY + mouseY);
+	}
 }
 
 function mouseOutReporter(event)
@@ -48,8 +68,41 @@ function mouseOutReporter(event)
 
 function mouseWheelReporter(event)
 {
-	console.log(event);
-	console.log("Hey!");
+	
+	if(event.deltaY < 0)
+	{
+		console.log(screen2.entities.length);
+		var temp = screen2.entities[0];
+		temp.changeZoom(0.05);
+		
+	}
+	else if(event.deltaY > 0)
+	{
+		var temp = screen2.entities[0];
+		temp.changeZoom(-0.05);
+	}
+}
+
+function mouseDownReporter(event)
+{
+	var rect = canDiv.getBoundingClientRect();
+	if(!mouseOnNode)
+	{
+		mouseDown = true;
+		dragX = event.clientX - rect.left;
+		dragY = event.clientY - rect.top;
+	}
+}
+
+function mouseUpReporter(event)
+{
+	if(mouseDown)
+	{
+		mouseDown = false;
+		console.log(screen2.entities.length);
+		var temp = screen2.entities[0];
+		temp.saveGlobalOffset();
+	}
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -125,7 +178,7 @@ function Screen(type)
 		lines.push(new RoadMapLine(nodes[1], nodes[5], "green", "yes"));*/
 		
 		this.entities.push(new RoadMap(nodes, lines));
-		
+		this.entities.push(new InfoScreen(720, 1080));
 		this.isShown = true;
 	}
 	this.entities.push(new Menu());
@@ -314,6 +367,9 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	this.clicked = false;
 	this.map = new RoadMap([], []);
 	
+	this.offsetSpaceX = 0;
+	this.offsetSpaceY = 0;
+	
 	const SMALL_SIZE = 10;
 	const BIG_SIZE = 20;
 	
@@ -321,9 +377,13 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	{
 		context.fillStyle = this.color;	
 		context.beginPath();
-		context.arc((this.x + this.offsetX) * this.map.zoom, (this.y + this.offsetY) * this.map.zoom, this.width, this.height, 0, 2* Math.PI);
+		context.arc((this.x + this.offsetX) * this.map.zoom + this.map.globalOffsetX, (this.y + this.offsetY) * this.map.zoom + this.map.globalOffsetY, this.width * this.map.zoom, this.height * this.map.zoom, 0, 2* Math.PI);
 		context.fill();
-		context.drawImage(this.nodeImage, (((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom), ((this.y + this.offsetY)- (this.nodeImage.height / 2)) * this.map.zoom, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
+		context.fillStyle = "rgba(255, 255, 255, 0.5)";
+		context.fillRect((((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
+		context.drawImage(this.nodeImage, (((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
+		
+
 	}
 	
 	this.getMap = function(nodeMap)
@@ -378,7 +438,11 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	this.nodeTo = nodeTo;
 	this.name = name;
 	this.color = color;
+	this.textAlpha = 1.0;
 	this.map = new RoadMap([], []);
+	
+	const TEXT_ALPHA_BIG = 1.0;
+	const TEXT_ALPHA_SMALL = 0.0;
 	
 	this.draw = function()
 	{
@@ -396,21 +460,37 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 		context.strokeStyle = this.color;
 		context.fillStyle = this.color;
 		context.beginPath();
-		context.moveTo(toX * this.map.zoom, toY * this.map.zoom);
-		context.lineTo((fromX - this.getTrigPosition(false, deg, 1)) * this.map.zoom, (fromY - this.getTrigPosition(true, deg, 1)) * this.map.zoom);
-		context.lineTo((fromX - this.getTrigPosition(false, deg, -1)) * this.map.zoom, (fromY - this.getTrigPosition(true, deg, -1)) * this.map.zoom);
+		context.moveTo(toX * this.map.zoom + this.map.globalOffsetX, toY * this.map.zoom + this.map.globalOffsetY);
+		context.lineTo(((fromX - this.getTrigPosition(false, deg, 1)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, 1)) * this.map.zoom) + this.map.globalOffsetY);
+		context.lineTo(((fromX - this.getTrigPosition(false, deg, -1)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, -1)) * this.map.zoom) + this.map.globalOffsetY);
 		context.fill();
 		
-		context.translate((fromX + toX) / 2 * this.map.zoom , (fromY + toY) / 2 * this.map.zoom);
-		context.rotate(deg);
-		context.translate(0, -20);
-		context.font = "16px Tahoma";
-		context.fillStyle = "black";
-		context.textAlign = "center";
-		context.fillText(this.name, 0, 0);
-		context.translate(0, 20);
-		context.rotate(-deg);
-		context.translate(-(fromX + toX) / 2 * this.map.zoom, -(fromY + toY) / 2 * this.map.zoom);
+		if(this.map.zoom >= 1)
+		{
+			context.translate((fromX + toX) / 2 * this.map.zoom + this.map.globalOffsetX, (fromY + toY) / 2 * this.map.zoom + this.map.globalOffsetY);
+			context.rotate(deg);
+			context.translate(0, -20);
+			context.font = "12px Tahoma";
+			context.fillStyle = "rgba(0, 0, 0, " + this.textAlpha + ")";
+			context.textAlign = "center";
+			context.fillText(this.name, 0, 0);
+			context.translate(0, 20);
+			context.rotate(-deg);
+			context.translate(-(fromX + toX) / 2 * this.map.zoom - this.map.globalOffsetX, -(fromY + toY) / 2 * this.map.zoom - this.map.globalOffsetY);
+			
+			if(this.textAlpha != 1)
+			{
+				this.textAlpha = (this.textAlpha + this.TEXT_ALPHA_BIG) / 2.0;
+			}
+		}
+		else
+		{
+			if(this.textAlpha != 0)
+			{
+				this.textAlpha = this.textAlpha / 2.0;
+			}
+		}
+		
 	}
 	
 	this.getTrigPosition = function(isSin, deg, plusOrMinus)
@@ -437,7 +517,11 @@ function RoadMap(nodes, lines)
 	this.numberOfNodes = nodes.length;
 	this.lines = lines;
 	this.numberOfLines = lines.length;
-	this.zoom = 1.5;
+	this.zoom = 1;
+	this.globalOffsetX = 0;
+	this.globalOffsetY = 0;
+	this.startGlobalOffsetX = 0;
+	this.startGlobalOffsetY = 0;
 	
 	this.init = function()
 	{
@@ -446,7 +530,7 @@ function RoadMap(nodes, lines)
 			this.nodes[i].getMap(this);
 		}
 		
-		for(var i = 0; i < thislines.length; i++)
+		for(var i = 0; i < this.lines.length; i++)
 		{
 			this.lines[i].getMap(this);
 		}
@@ -456,7 +540,7 @@ function RoadMap(nodes, lines)
 	{
 		for(var i = 0; i < this.numberOfLines; i++)
 		{
-			this.lines[i].draw();
+			this.lines[i].draw(this.globalOffsetX, this.globalOffsetY);
 		}
 		
 		for(var i = 0; i < this.numberOfNodes; i++)
@@ -472,6 +556,42 @@ function RoadMap(nodes, lines)
 			this.nodes[i].update(mouseX, mouseY, mouseOut);
 		}
 	}
+	
+	this.changeZoom = function(change)
+	{
+		this.zoom += change;
+		for(var i = 0; i < this.nodes.length; i++)
+		{
+			this.nodes[i].getMap(this);
+		}
+		
+		for(var i = 0; i < this.lines.length; i++)
+		{
+			this.lines[i].getMap(this);
+		}
+	}
+	
+	this.changeGlobalOffset = function(x, y)
+	{
+		this.globalOffsetX = this.startGlobalOffsetX + x;
+		this.globalOffsetY = this.startGlobalOffsetY + y;
+		console.log(this.globalOffsetX);
+		for(var i = 0; i < this.nodes.length; i++)
+		{
+			this.nodes[i].getMap(this);
+		}
+		
+		for(var i = 0; i < this.lines.length; i++)
+		{
+			this.lines[i].getMap(this);
+		}
+	}
+	
+	this.saveGlobalOffset = function()
+	{
+		this.startGlobalOffsetX = this.globalOffsetX;
+		this.startGlobalOffsetY = this.globalOffsetY;
+	}
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -479,9 +599,24 @@ function RoadMap(nodes, lines)
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
-function InfoScreen(x, y)
+function InfoScreen(height, width)
 {
-	Entity.Call(this, )
+	Entity.call(this, width, 25, 500, height - 25, "blue");
+	this.madeVisible = true;
+	
+	const INVISIBLEX = width;
+	const VISIBLEX = width - this.width;
+	
+	this.draw = function()
+	{
+		context.fillStyle = this.color;
+		context.fillRect(this.x, this.y, this.width, this.height);
+		//console.log(canDiv.width - 25, this.width);
+	}
+	
+	this.update = function(mouseX, mouseY, mouseOut)
+	{
+	}
 }
 
 setInterval(draw, 50);
