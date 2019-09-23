@@ -1,0 +1,8 @@
+Williamson Synthesis
+
+Reactants - NaOR
+
+Reaction Type - Sn2 Nucleophilic Substitution
+
+How it Works
+	1 - SN2 Reaction (Nucleophilic Attack/Loss of a Leaving Group): The electrons of the OR group attack the carbon bonded with the alkyl group. Since the alkyl group is a good leaving group, the halide leaves.

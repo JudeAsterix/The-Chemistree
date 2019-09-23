@@ -1,8 +1,29 @@
+const ReactionEnums ={
+	
+};
+
+const CompoundEnums ={
+	
+};
+
+var entityEnums = {
+	SCREEN: "screen",
+	MENU: "menu",
+	LOGO: "logo",
+	ROADMAPNODE: "roadmapnode",
+	ROADMAPLINE: "roadmapline",
+	INFOSCREEN: "infoscreen"
+};
+
+/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+  This is the enumerations for the entities, reactions, and compounds
+  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+*/
+
 var canDiv = document.getElementById("canvas");
 var context = canDiv.getContext("2d");
 var screen1 = new Screen(0);
 var screen2 = new Screen(1);
-
 var mouseDown = false;
 var mouseOnNode = false;
 var mouseOnLine = false;
@@ -11,6 +32,8 @@ var mouseY = 0;
 
 var dragX = 0;
 var dragY = 0;
+
+var zoom = 1;
 
 var onScreen = false;
 var menu = new Menu();
@@ -23,7 +46,10 @@ const WIDTH = 1080;
 canDiv.height = HEIGHT;
 canDiv.width = WIDTH;
 
+
+
 function initialise() {
+	console.log(enitityEnums);
 	canDiv.addEventListener("click", clickReporter, false);
 	canDiv.addEventListener("mousemove", mouseMoveReporter, false);
 	canDiv.addEventListener("mouseout", mouseOutReporter, false);
@@ -71,13 +97,15 @@ function mouseWheelReporter(event)
 	
 	if(event.deltaY < 0)
 	{
+		zoom += 0.05
 		console.log(screen2.entities.length);
 		var temp = screen2.entities[0];
 		temp.changeZoom(0.05);
 		
 	}
-	else if(event.deltaY > 0)
+	else if(event.deltaY > 0 && zoom > 0.25)
 	{
+		zoom -= 0.05
 		var temp = screen2.entities[0];
 		temp.changeZoom(-0.05);
 	}
@@ -121,12 +149,13 @@ function update()
 	screen2.update(mouseX, mouseY, onScreen);
 }
 
-function Entity(x, y, width, height, color)
+function Entity(x, y, width, height, color, id)
 {
 	this.x = x;
 	this.y = y;
 	this.width = width;
 	this.height = height;
+	this.id = id;
 	
 	this.draw = function()
 	{
@@ -136,6 +165,15 @@ function Entity(x, y, width, height, color)
 	
 	this.update = function(mouseX, mouseY, mouseOut)
 	{}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+	}
+	
+	this.getID = function()
+	{
+		return this.id;
+	}
 }
 
 function Screen(type)
@@ -145,7 +183,7 @@ function Screen(type)
 	this.entities = [];
 	this.droppedDown;
 	this.verticalShift = 0;
-	Entity.call(this, 0, 0, canDiv.height, canDiv.width, "rgb(109, 137, 107)");	
+	Entity.call(this, 0, 0, canDiv.height, canDiv.width, "rgb(109, 137, 107)", entityEnums.SCREEN);	
 	
 	if(this.type == 0)
 	{
@@ -162,23 +200,16 @@ function Screen(type)
 		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "two"));
 		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "three"));
 		
-		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "Williamson Synthesis"));
-		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "Hydrolysis of Alkyl Halide"));
-		/*nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)"));
-		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)"));
-		nodes.push(new RoadMapNode(500, 350, "rgb(0, 200, 200)"));
-		nodes.push(new RoadMapNode(600, 250, "rgb(0, 200, 200)"));
-		nodes.push(new RoadMapNode(550, 400, "rgb(0, 200, 200)"));
-		nodes.push(new RoadMapNode(700, 375, "rgb(0, 200, 200)"));
+		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3"));
+		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH"));
 		
-		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "yes"));
-		lines.push(new RoadMapLine(nodes[2], nodes[3], "blue", "yes"));
-		lines.push(new RoadMapLine(nodes[4], nodes[3], "red", "yes"));
-		lines.push(new RoadMapLine(nodes[3], nodes[5], "purple", "yes"));
-		lines.push(new RoadMapLine(nodes[1], nodes[5], "green", "yes"));*/
+		var tempLine = new RoadMapLine(nodes[0], nodes[1], "blue", "Hydrolysis of an Alkyl Halide");
+		var tempInfo = new InfoScreen(720, 1080, tempLine);
+		tempInfo.setText();
 		
 		this.entities.push(new RoadMap(nodes, lines));
-		this.entities.push(new InfoScreen(720, 1080));
+		this.entities.push(tempInfo);
+		
 		this.isShown = true;
 	}
 	this.entities.push(new Menu());
@@ -187,13 +218,13 @@ function Screen(type)
 		var frontGrad = context.createLinearGradient(0, 0, 0, 360);
 		if(this.type == 0)
 		{
-			frontGrad.addColorStop(0, "rgb(38, 155, 132)");
+			frontGrad.addColorStop(0, "#5a9d2d");
 			frontGrad.addColorStop(1, "rgb(56, 216, 155)");
 		}
 		else
 		{
-			frontGrad.addColorStop(0, "rgb(255, 235, 163)");
-			frontGrad.addColorStop(1, "rgb(232, 255, 163)");
+			frontGrad.addColorStop(0, "#5a9d2d");
+			frontGrad.addColorStop(1, "#ecf5ed");
 		}
 		context.fillStyle = frontGrad;
 		context.fillRect(0, 0, 1080, 720);
@@ -215,7 +246,10 @@ function Screen(type)
 	
 	this.clickUpdate = function(mouseX, mouseY)
 	{
-		
+		for(var i = 0; i < this.entities.length; i++)
+		{
+			this.entities[i].clickUpdate(mouseX, mouseY);
+		}
 	}
 }
 
@@ -226,26 +260,44 @@ function Screen(type)
 
 function Menu()
 {
-	Entity.call(this, 0, 0, 1080, 25, "rgb(144, 178, 141)");
+	Entity.call(this, 0, 0, 1080, 25, "#38630e", entityEnums.MENU);
 	this.dropdownHighlighted = false;
+	this.infoScreenHighlighted = false;
+	this.infoScreenCharacter = [">", "<"];
+	this.infoScreenCharacterIndex = 0;
 	
 	this.draw = function()
 	{
-		context.fillStyle = "rgb(144, 178, 141)";
+		context.fillStyle = "#38630e";
 		context.fillRect(this.x, this.y, this.width, this.height);
 		if(this.dropdownHighlighted)
 		{
-			context.fillStyle = "rgb(81, 209, 138)";
+			context.fillStyle = "#d0e1ca";
 		}
 		else
 		{
-			context.fillStyle = "rgb(109, 137, 107)";
+			context.fillStyle = "#aec5aa";
 		}
 		context.fillRect(this.x, this.y, this.width / 15, this.height);
 		context.fillStyle ="rgb(40, 66, 51)";
 		context.font = "20px Arial";
 		context.textAlign = "center";
 		context.fillText("V", this.width / 30, 20);
+			
+		if(this.infoScreenHighlighted)
+		{
+			context.fillStyle = "#d0e1ca";
+		}
+		else
+		{
+			context.fillStyle = "#aec5aa";
+		}
+		
+		context.fillRect(this.x + this.width - (this.width / 15), this.y, this.width / 15, this.height);
+		context.fillStyle ="rgb(40, 66, 51)";
+		context.font = "20px Arial";
+		context.textAlign = "center";
+		context.fillText(this.infoScreenCharacter[this.infoScreenCharacterIndex], this.x + this.width - this.width / 30, 20);
 		
 	}
 	
@@ -254,6 +306,7 @@ function Menu()
 		if(mouseOut)
 		{
 			this.setDropDownHighlighted(false);
+			this.setInfoScreenHighlighted(false);
 		}
 		else
 		{
@@ -261,28 +314,57 @@ function Menu()
 			{
 				this.setDropDownHighlighted(true);
 			}
+			else if(mouseX > this.width - this.width / 15 && mouseX < this.width && mouseY > 0 && mouseY < this.height)
+			{
+				this.setInfoScreenHighlighted(true);
+			}
 			else
 			{
 				this.setDropDownHighlighted(false);
+				this.setInfoScreenHighlighted(false);
 			}
 		}
+		
 	}
 	
 	this.clickUpdate = function(mouseX, mouseY)
 	{
-		
+		if(mouseX > 0 && mouseX < (this.width / 15) && mouseY > 0 && mouseY < this.height)
+		{
+			console.log("Cool1.");
+		}
+		else if(mouseX > this.width - this.width / 15 && mouseX < this.width && mouseY > 0 && mouseY < this.height)
+		{
+			var index = 0;
+			console.log("Entities: " + screen2.entities.length);
+			while(index < screen2.entities.length && screen2.entities[index].id != "infoscreen")
+			{
+				index = index + 1;
+			}
+			if(index < screen2.entities.length)
+			{
+				screen2.entities[index].updateVisible();
+				console.log("Should be working");
+				this.infoScreenCharacterIndex = (this.infoScreenCharacterIndex + 1) % 2;
+			}
+		}
 	}
 	
 	this.setDropDownHighlighted = function(newBool)
 	{
 		this.dropdownHighlighted = newBool;
 	}
+	
+	this.setInfoScreenHighlighted = function(newBool)
+	{
+		this.infoScreenHighlighted = newBool;
+	}
 }
 
 function Logo()
 {
 	var hoverY = 0;
-	Entity.call(this, 100, 100, 880, 500, "blue");
+	Entity.call(this, 100, 100, 880, 500, "blue", entityEnums.LOGO);
 	
 	this.moveShift = function(shift, mag)
 	{
@@ -358,7 +440,7 @@ function Logo()
 
 function RoadMapNode(x, y, color, name, imageId) // ----This is the node class----
 {
-	Entity.call(this, x, y, 10, 10, color);
+	Entity.call(this, x, y, 10, 10, color, entityEnums.ROADMAPNODE);
 	this.nodeImage = document.getElementById(imageId);
 	this.color = color;
 	this.offsetX = 0;
@@ -414,8 +496,8 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	
 	this.inTheCircle = function(mouseX, mouseY)
 	{
-		var dotX = (this.x + this.offsetX) * this.map.zoom;
-		var dotY = (this.y + this.offsetY) * this.map.zoom;
+		var dotX = (this.x + this.offsetX) * this.map.zoom + this.map.globalOffsetX;
+		var dotY = (this.y + this.offsetY) * this.map.zoom + this.map.globalOffsetY;
 		
 		var distance = Math.sqrt(Math.pow((dotX - mouseX), 2) + Math.pow((dotY - mouseY), 2));
 		
@@ -428,11 +510,16 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 			return false;
 		}
 	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
 }
 
 function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 {
-	Entity.call(this, -1, -1, 10, 10, color);
+	Entity.call(this, -1, -1, 10, 10, color, entityEnums.ROADMAPLINE);
 	this.roadMap = new RoadMap([], []);
 	this.nodeFrom = nodeFrom;
 	this.nodeTo = nodeTo;
@@ -508,6 +595,11 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	this.getMap = function(nodeMap)
 	{
 		this.map = nodeMap;
+	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
 	}
 }
 
@@ -592,6 +684,11 @@ function RoadMap(nodes, lines)
 		this.startGlobalOffsetX = this.globalOffsetX;
 		this.startGlobalOffsetY = this.globalOffsetY;
 	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -599,23 +696,61 @@ function RoadMap(nodes, lines)
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
-function InfoScreen(height, width)
+function InfoScreen(height, width, line)
 {
-	Entity.call(this, width, 25, 500, height - 25, "blue");
+	Entity.call(this, width - 400, 25, 400, height - 25, "#add285", entityEnums.INFOSCREEN);
 	this.madeVisible = true;
+	this.infoText = "If you see this, you got yourself an empty thing!"
 	
-	const INVISIBLEX = width;
-	const VISIBLEX = width - this.width;
+	this.INVISIBLEX = 1080;
+	this.VISIBLEX = 1080 - this.width;
 	
 	this.draw = function()
 	{
-		context.fillStyle = this.color;
+		context.fillStyle = "#395112";
 		context.fillRect(this.x, this.y, this.width, this.height);
 		//console.log(canDiv.width - 25, this.width);
 	}
 	
 	this.update = function(mouseX, mouseY, mouseOut)
 	{
+		if((this.madeVisible && this.x != this.VISIBLEX) || (!this.madeVisible && this.x != this.INVISIBLEX))
+		{
+			var change;
+			if(this.madeVisible)
+			{
+				change = this.x - this.VISIBLEX;
+				console.log(this.x + "," + this.VISIBLEX);
+				console.log(change);
+			}
+			else
+			{
+				change = this.x - this.INVISIBLEX;
+			}
+			
+			this.x -= change / 5;
+		}
+	}
+	
+	this.setText = function()
+	{
+		var r = new FileReader();
+		console.log("Whoah");
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+		  // Great success! All the File APIs are supported.
+		} else {
+		  alert('The File APIs are not fully supported in this browser.');
+		}
+	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
+	
+	this.updateVisible = function()
+	{
+		this.madeVisible = !this.madeVisible;
 	}
 }
 
