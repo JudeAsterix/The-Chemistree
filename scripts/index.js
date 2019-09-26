@@ -16,7 +16,7 @@ var entityEnums = {
 };
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  This is the enumerations for the entities, reactions, and compounds
+  These are the enumerations for the entities, reactions, and compounds
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
@@ -134,13 +134,13 @@ function mouseUpReporter(event)
 }
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  This is the main draw section and entity section.  Don't change.
+  This is the main draw section and entity section.  Don't change unless necessary.
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
 function draw() {
 	context.fillStyle = "rgb(0, 0, 0)";
-	screen2.draw();
+	screen2.draw(mouseX, mouseY);
 	update();
 }
 
@@ -161,6 +161,10 @@ function Entity(x, y, width, height, color, id)
 	{
 		context.fillStyle = "red";
 		context.fillRect(this.x, this.y, this.width, this.height);
+	}
+	
+	this.draw = function(mouseX, mouseY)
+	{
 	}
 	
 	this.update = function(mouseX, mouseY, mouseOut)
@@ -188,7 +192,6 @@ function Screen(type)
 	if(this.type == 0)
 	{
 		this.droppedDown = false;
-		this.entities.push(new Logo());
 	}
 	else if(this.type == 1)
 	{
@@ -213,7 +216,7 @@ function Screen(type)
 		this.isShown = true;
 	}
 	this.entities.push(new Menu());
-	this.draw = function()
+	this.draw = function(mouseX, mouseY)
 	{
 		var frontGrad = context.createLinearGradient(0, 0, 0, 360);
 		if(this.type == 0)
@@ -361,78 +364,6 @@ function Menu()
 	}
 }
 
-function Logo()
-{
-	var hoverY = 0;
-	Entity.call(this, 100, 100, 880, 500, "blue", entityEnums.LOGO);
-	
-	this.moveShift = function(shift, mag)
-	{
-		return Math.sin(((hoverY / 4) + shift) / 20) * mag;
-	}
-	
-	this.draw = function()
-	{
-		var points = [[this.moveShift(270, 20) + 500, this.moveShift(0, 20) + 100],
-						 [this.moveShift(315, 20) + 600, this.moveShift(10, 20) + 100],
-						 [this.moveShift(0, 20) + 700, this.moveShift(20, 20) + 200],
-						 [this.moveShift(45, 20) + 700, this.moveShift(30, 20) + 300],
-						 [this.moveShift(90, 20) + 600, this.moveShift(40, 20) + 400],
-						 [this.moveShift(135, 20) + 500, this.moveShift(50, 20) + 400],
-						 [this.moveShift(180, 20) + 400, this.moveShift(60, 20) + 300],
-						 [this.moveShift(225, 20) + 400, this.moveShift(70, 20) + 200],
-						 [this.moveShift(270, 20) + 500, this.moveShift(0, 20) + 100]];
-		var moveY2 = Math.sin(((hoverY + 10) / 20)) * 20;
-		context.strokeStyle = "rgb(50, 101, 186)";
-		context.beginPath();
-		context.moveTo(points[0][0], points[0][1]);
-		context.lineTo(points[1][0], points[1][1]);
-		context.lineTo(points[2][0], points[2][1]);
-		context.lineTo(points[3][0], points[3][1]);
-		context.lineTo(points[4][0], points[4][1]);
-		context.lineTo(points[5][0], points[5][1]);
-		context.lineTo(points[6][0], points[6][1]);
-		context.lineTo(points[7][0], points[7][1]);
-		context.lineTo(points[0][0], points[0][1]);
-		
-		context.moveTo(this.moveShift(270, 20) + 500, this.moveShift(0, 20) + 100);
-		context.lineTo(this.moveShift(10, 20) + 700, this.moveShift(30, 20) + 300);
-		context.lineTo(this.moveShift(40, 20) + 400, this.moveShift(60, 20) + 300);
-		context.lineTo(this.moveShift(-10, 20) + 600, this.moveShift(10, 20) + 100);
-		context.lineTo(this.moveShift(20, 20) + 600, this.moveShift(40, 20) + 400);
-		context.lineTo(this.moveShift(50, 20) + 400, this.moveShift(70, 20) + 200);
-		context.lineTo(this.moveShift(0, 20) + 700, this.moveShift(20, 20) + 200);
-		context.lineTo(this.moveShift(30, 20) + 500, this.moveShift(50, 20) + 400);
-		context.lineTo(this.moveShift(270, 20) + 500, this.moveShift(0, 20) + 100);
-		
-		context.moveTo(this.moveShift(270, 20) + 500, this.moveShift(0, 20) + 100);
-		context.lineTo(this.moveShift(20, 20) + 600, this.moveShift(40, 20) + 400);
-		context.lineTo(this.moveShift(-10, 20) + 600, this.moveShift(10, 20) + 100);
-		context.lineTo(this.moveShift(30, 20) + 500, this.moveShift(50, 20) + 400);
-		context.lineTo(this.moveShift(0, 20) + 700, this.moveShift(20, 20) + 200);
-		context.lineTo(this.moveShift(40, 20) + 400, this.moveShift(60, 20) + 300);
-		context.lineTo(this.moveShift(10, 20) + 700, this.moveShift(30, 20) + 300);
-		context.lineTo(this.moveShift(50, 20) + 400, this.moveShift(70, 20) + 200);
-		
-		context.moveTo(this.moveShift(-20, 20) + 500, this.moveShift(0, 20) + 100);
-		context.lineTo(this.moveShift(0, 20) + 700, this.moveShift(20, 20) + 200);
-		context.lineTo(this.moveShift(20, 20) + 600, this.moveShift(40, 20) + 400);
-		context.lineTo(this.moveShift(40, 20) + 400, this.moveShift(60, 20) + 300);
-		context.lineTo(this.moveShift(-20, 20) + 500, this.moveShift(0, 20) + 100);
-		context.lineTo(this.moveShift(-10, 20) + 600, this.moveShift(10, 20) + 100);
-		context.lineTo(this.moveShift(10, 20) + 700, this.moveShift(30, 20) + 300);
-		context.lineTo(this.moveShift(30, 20) + 500, this.moveShift(50, 20) + 400);
-		context.lineTo(this.moveShift(50, 20) + 400, this.moveShift(70, 20) + 200);
-		context.lineTo(this.moveShift(-10, 20) + 600, this.moveShift(10, 20) + 100);
-		context.stroke();
-		
-		context.fillStyle = "rgb(68, 104, 163)";
-		context.font = "70px Segoe UI Light";
-		context.fillText("The ChemisTree", 550 - (context.measureText("The ChemisTree").width / 2),500);
-		hoverY++;
-	}
-}
-
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
   =          This section is for the visual road-map             =
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -448,7 +379,7 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	this.name = name;
 	this.clicked = false;
 	this.map = new RoadMap([], []);
-	
+	this.hovering = false;
 	this.offsetSpaceX = 0;
 	this.offsetSpaceY = 0;
 	
@@ -464,8 +395,6 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 		context.fillStyle = "rgba(255, 255, 255, 0.5)";
 		context.fillRect((((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
 		context.drawImage(this.nodeImage, (((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
-		
-
 	}
 	
 	this.getMap = function(nodeMap)
@@ -501,12 +430,14 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 		
 		var distance = Math.sqrt(Math.pow((dotX - mouseX), 2) + Math.pow((dotY - mouseY), 2));
 		
-		if(distance < this.width)
+		if(distance < this.width * this.map.zoom)
 		{
+			this.hovering = true;
 			return true;
 		}
 		else
 		{
+			this.hovering = false;
 			return false;
 		}
 	}
@@ -523,13 +454,18 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	this.roadMap = new RoadMap([], []);
 	this.nodeFrom = nodeFrom;
 	this.nodeTo = nodeTo;
+	this.fromWidth = 10;
+	this.toWidth = 10;
 	this.name = name;
 	this.color = color;
-	this.textAlpha = 1.0;
-	this.map = new RoadMap([], []);
 	
+	this.textAlpha = 1.0;
+	this.selected = false;
+	this.map = new RoadMap([], []);
 	const TEXT_ALPHA_BIG = 1.0;
 	const TEXT_ALPHA_SMALL = 0.0;
+	const WIDTH_BIG = 20;
+	const WIDTH_SMALL = 10;
 	
 	this.draw = function()
 	{
@@ -542,16 +478,9 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 		var heightDiff = toY - fromY;
 		
 		var deg = Math.atan(heightDiff / widthDiff);
+		this.makeLine();
 		
-		context.lineWidth = 5;
-		context.strokeStyle = this.color;
-		context.fillStyle = this.color;
-		context.beginPath();
-		context.moveTo(toX * this.map.zoom + this.map.globalOffsetX, toY * this.map.zoom + this.map.globalOffsetY);
-		context.lineTo(((fromX - this.getTrigPosition(false, deg, 1)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, 1)) * this.map.zoom) + this.map.globalOffsetY);
-		context.lineTo(((fromX - this.getTrigPosition(false, deg, -1)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, -1)) * this.map.zoom) + this.map.globalOffsetY);
-		context.fill();
-		
+		//Creates the text
 		if(this.map.zoom >= 1)
 		{
 			context.translate((fromX + toX) / 2 * this.map.zoom + this.map.globalOffsetX, (fromY + toY) / 2 * this.map.zoom + this.map.globalOffsetY);
@@ -580,16 +509,82 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 		
 	}
 	
-	this.getTrigPosition = function(isSin, deg, plusOrMinus)
+	this.update = function(mouseX, mouseY, mouseOut)
 	{
-		if(isSin == true)
+		if(!this.nodeFrom.hovering && !this.nodeTo.hovering)
 		{
-			return (Math.round(this.nodeFrom.height / 2 * Math.sin((deg + (plusOrMinus * 90)))));
+			if(this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_BIG || this.toWidth != WIDTH_BIG))
+			{
+				var sizeChange = WIDTH_BIG - this.fromWidth;
+				this.fromWidth = this.fromWidth + sizeChange / 6;
+				this.toWidth = this.toWidth + sizeChange / 6;
+			}
+			else if(!this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL))
+			{
+				var sizeChange = this.fromWidth - WIDTH_SMALL;
+				this.fromWidth = this.fromWidth - sizeChange / 6;
+				this.toWidth = this.toWidth - sizeChange / 6;
+			}
+		}
+		else if(this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL)
+		{
+			this.fromWidth = WIDTH_SMALL;
+			this.toWidth = WIDTH_SMALL;
+		}
+	}
+	
+	this.getTrigPosition = function(isSin, deg, plusOrMinus, nodeIsTo)
+	{
+		var width;
+		if(nodeIsTo)
+		{
+			width = this.toWidth;
 		}
 		else
 		{
-			return (Math.round(this.nodeFrom.height / 2 * Math.cos((deg + (plusOrMinus * 90)))));
+			width = this.fromWidth;
 		}
+		
+		if(isSin == true)
+		{
+			return (Math.round(width / 2 * Math.sin((deg + (plusOrMinus * 90)))));
+		}
+		else
+		{
+			return (Math.round(width / 2 * Math.cos((deg + (plusOrMinus * 90)))));
+		}
+	}
+	
+	this.makeLine = function()
+	{
+		var fromX = this.nodeFrom.offsetX + this.nodeFrom.x;
+		var toX = this.nodeTo.offsetX + this.nodeTo.x;
+		var fromY = this.nodeFrom.offsetY + this.nodeFrom.y;
+		var toY = this.nodeTo.offsetY + this.nodeTo.y;
+		
+		var widthDiff = toX - fromX;
+		var heightDiff = toY - fromY;
+		
+		var deg = Math.atan(heightDiff / widthDiff);
+		
+		//Makes the actual line
+		context.lineWidth = 5;
+		context.strokeStyle = this.color;
+		context.fillStyle = this.color;
+		context.beginPath();
+		context.moveTo((toX - this.getTrigPosition(false, deg, 1, true)) * this.map.zoom + this.map.globalOffsetX, (toY - this.getTrigPosition(true, deg, 1, true)) * this.map.zoom + this.map.globalOffsetY);
+		context.lineTo((toX - this.getTrigPosition(false, deg, -1, true)) * this.map.zoom + this.map.globalOffsetX, (toY - this.getTrigPosition(true, deg, -1, true)) * this.map.zoom + this.map.globalOffsetY);
+		context.lineTo(((fromX - this.getTrigPosition(false, deg, -1, false)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, -1, false)) * this.map.zoom) + this.map.globalOffsetY);
+		context.lineTo(((fromX - this.getTrigPosition(false, deg, 1, false)) * this.map.zoom) + this.map.globalOffsetX, ((fromY - this.getTrigPosition(true, deg, 1, false)) * this.map.zoom) + this.map.globalOffsetY);
+		context.fill();
+	}
+	
+	this.cursorOver = function(mouseX, mouseY)
+	{
+		context.globalAlpha = 0.0;
+		this.makeLine();
+		context.globalAlpha = 1.0;
+		return(context.isPointInPath(mouseX, mouseY));
 	}
 	
 	this.getMap = function(nodeMap)
@@ -646,6 +641,11 @@ function RoadMap(nodes, lines)
 		for(var i = 0; i < this.numberOfNodes; i++)
 		{
 			this.nodes[i].update(mouseX, mouseY, mouseOut);
+		}
+		
+		for(var i = 0; i < this.numberOfLines; i++)
+		{
+			this.lines[i].update(mouseX, mouseY, mouseOut);
 		}
 	}
 	
