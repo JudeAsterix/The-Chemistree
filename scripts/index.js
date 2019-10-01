@@ -2,8 +2,15 @@ const ReactionEnums ={
 	
 };
 
-const CompoundEnums ={
-	
+var CompoundEnums = {
+	Isobutanol: {
+		commonName: "Isobutanol",
+		IUPACName: "2-Methyl-1-propanol",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "-108.0°C"
+	},
+	OneCloroTwoMethyl: "1-Chloro-2-Methylpropane",
+	TwoMethoypropane: "2-Methoxypropane",
 };
 
 var entityEnums = {
@@ -710,6 +717,7 @@ function InfoScreen(height, width, line)
 		context.fillStyle = "#395112";
 		context.fillRect(this.x, this.y, this.width, this.height);
 		//console.log(canDiv.width - 25, this.width);
+		context.fontcolor = "red";
 	}
 	
 	this.update = function(mouseX, mouseY, mouseOut)
