@@ -7,19 +7,22 @@ var CompoundEnums = {
 		commonName: "Isobutanol",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C"
+		meltingPoint: "-108.0°C",
+		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	OneCloroTwoMethyl: {
 		commonName: "1-Chloro-2-Methylpropane",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C"
+		meltingPoint: "-108.0°C",
+		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	TwoMethoxypropane: {
 		commonName:"2-Methoxypropane",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C"
+		meltingPoint: "-108.0°C",
+		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	}, 
 };
 
@@ -399,6 +402,7 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	this.hovering = false;
 	this.offsetSpaceX = 0;
 	this.offsetSpaceY = 0;
+	this.info = CompoundEnums[imageId];
 	
 	const SMALL_SIZE = 10;
 	const BIG_SIZE = 20;
@@ -718,7 +722,6 @@ function InfoScreen(height, width, line)
 	Entity.call(this, width - 400, 25, 400, height - 25, "#add285", entityEnums.INFOSCREEN);
 	this.madeVisible = true;
 	this.compoundMechanismOrNil = 3; // Compound - 1 | Mechanism - 2 | Nil - 3
-	this.infoText = "If you see this, you got yourself an empty thing!"
 	
 	this.INVISIBLEX = 1080;
 	this.VISIBLEX = 1080 - this.width;
@@ -727,18 +730,25 @@ function InfoScreen(height, width, line)
 	{
 		context.fillStyle = "#4a7821";
 		context.fillRect(this.x, this.y, this.width, this.height);
-		if(this.compoundMechanismOrNil == 3)
+		if(this.compoundMechanismOrNil == 1)
 		{
 			context.font = "40px Century Gothic";
-			var textHeight = context.measurent
 			context.fillStyle = "black";
 			context.textAlign = "left";
 			context.fillText("'Ello!", this.x + 10, this.y + 50, this.width - 20);
+		}
+		else if(this.compoundMechanismOrNil == 3)
+		{
+			context.font = "40px Century Gothic";
+			context.fillStyle = "black";
+			context.textAlign = "left";
+			context.fillText("'Ello!", this.x + 10, this.y + 50, this.width - 20);
+			var puppyImage = document.getElementById("cute-puppy");
+			context.drawImage(puppyImage, this.x + 10, this.y + 70, this.width - 20, 230);
 			context.font = "20px Century Gothic";
-			context.fillText("", this.x + 10, this.y + 130, this.width - 20);
 			this.wrapText("This is where the information for any compounds and mechanisms you click on will go, but this feature hasn't been implemented yet."
 			+ " Until then, this little message will pop up! This is also a test for me to see if this font and the line breaks look nice."
-			+ " Obviously if you're seeing this, that's very much the case. Overall, I'm feeling a strong 8 to a light 9.", this.x + 10, this.y + 100, this.width - 20, 25);
+			+ " Obviously if you're seeing this, that's very much the case. Overall, I'm feeling a strong 8 to a light 9.", this.x + 10, this.y + 340, this.width - 20, 25);
 		}
 		//console.log(canDiv.width - 25, this.width);
 		context.fontcolor = "red";
