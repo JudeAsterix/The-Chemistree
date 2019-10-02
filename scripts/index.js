@@ -9,8 +9,18 @@ var CompoundEnums = {
 		molecularWeight: "74.12 g/mol",
 		meltingPoint: "-108.0°C"
 	},
-	OneCloroTwoMethyl: "1-Chloro-2-Methylpropane",
-	TwoMethoypropane: "2-Methoxypropane",
+	OneCloroTwoMethyl: {
+		commonName: "1-Chloro-2-Methylpropane",
+		IUPACName: "2-Methyl-1-propanol",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "-108.0°C"
+	},
+	TwoMethoxypropane: {
+		commonName:"2-Methoxypropane",
+		IUPACName: "2-Methyl-1-propanol",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "-108.0°C"
+	}, 
 };
 
 var entityEnums = {
@@ -23,7 +33,7 @@ var entityEnums = {
 };
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  These are the enumerations for the entities, reactions, and compounds
+  These are the enumerations for the entities, reactions, and compounds; any text-based data will go here
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 */
 
@@ -206,9 +216,9 @@ function Screen(type)
 		var lines = [];
 		this.droppedDown = true;
 		
-		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)", "the", "one"));
-		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "two"));
-		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "three"));
+		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)", "the", "OneCloroTwoMethyl"));
+		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "TwoMethoxypropane"));
+		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "Isobutanol"));
 		
 		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3"));
 		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH"));
@@ -707,6 +717,7 @@ function InfoScreen(height, width, line)
 {
 	Entity.call(this, width - 400, 25, 400, height - 25, "#add285", entityEnums.INFOSCREEN);
 	this.madeVisible = true;
+	this.compoundMechanismOrNil = 3; // Compound - 1 | Mechanism - 2 | Nil - 3
 	this.infoText = "If you see this, you got yourself an empty thing!"
 	
 	this.INVISIBLEX = 1080;
@@ -714,10 +725,47 @@ function InfoScreen(height, width, line)
 	
 	this.draw = function()
 	{
-		context.fillStyle = "#395112";
+		context.fillStyle = "#4a7821";
 		context.fillRect(this.x, this.y, this.width, this.height);
+		if(this.compoundMechanismOrNil == 3)
+		{
+			context.font = "40px Century Gothic";
+			var textHeight = context.measurent
+			context.fillStyle = "black";
+			context.textAlign = "left";
+			context.fillText("'Ello!", this.x + 10, this.y + 50, this.width - 20);
+			context.font = "20px Century Gothic";
+			context.fillText("", this.x + 10, this.y + 130, this.width - 20);
+			this.wrapText("This is where the information for any compounds and mechanisms you click on will go, but this feature hasn't been implemented yet."
+			+ " Until then, this little message will pop up! This is also a test for me to see if this font and the line breaks look nice."
+			+ " Obviously if you're seeing this, that's very much the case. Overall, I'm feeling a strong 8 to a light 9.", this.x + 10, this.y + 100, this.width - 20, 25);
+		}
 		//console.log(canDiv.width - 25, this.width);
 		context.fontcolor = "red";
+	}
+	
+	this.wrapText = function(text, x, y, maxWidth, lineHeight) 
+	{
+		var words = text.split(' ');
+		var line = '';
+		
+		for(var n = 0; n < words.length; n++) 
+		{
+			var testLine = line + words[n] + ' ';
+			var metrics = context.measureText(testLine);
+			var testWidth = metrics.width;
+			if(testWidth > maxWidth && n > 0) 
+			{
+				context.fillText(line, x, y);
+				line = words[n] + ' ';
+				y += lineHeight;
+			}
+			else
+			{
+				line = testLine;
+			}
+		}
+		context.fillText(line, x, y);
 	}
 	
 	this.update = function(mouseX, mouseY, mouseOut)
@@ -742,12 +790,9 @@ function InfoScreen(height, width, line)
 	
 	this.setText = function()
 	{
-		var r = new FileReader();
-		console.log("Whoah");
-		if (window.File && window.FileReader && window.FileList && window.Blob) {
-		  // Great success! All the File APIs are supported.
-		} else {
-		  alert('The File APIs are not fully supported in this browser.');
+		if(this.compoundMechanismOrNil == 3)
+		{
+			this.infoText = "If you see this, you got yourself an empty thing!"
 		}
 	}
 	
