@@ -1,9 +1,17 @@
-const ReactionEnums ={
-	
+var MechanismEnums = {
+	HydroAlide: {
+		id: "HydroAlide",
+		commonName: "Hydrolisis of an Alkyl Halide"
+	},
+	WilliHesis: {
+		id: "WilliHesis",
+		commonName: "Williamson Synthesis"
+	}
 };
 
 var CompoundEnums = {
 	Isobutanol: {
+		id: "Isobutanol",
 		commonName: "Isobutanol",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
@@ -11,6 +19,7 @@ var CompoundEnums = {
 		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	OneCloroTwoMethyl: {
+		id:"OneCloroTwoMethyl",
 		commonName: "1-Chloro-2-Methylpropane",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
@@ -18,6 +27,7 @@ var CompoundEnums = {
 		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	TwoMethoxypropane: {
+		id:"TwoMethoxypropane",
 		commonName:"2-Methoxypropane",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
@@ -32,6 +42,7 @@ var entityEnums = {
 	LOGO: "logo",
 	ROADMAPNODE: "roadmapnode",
 	ROADMAPLINE: "roadmapline",
+	ROADMAP: "roadmap",
 	INFOSCREEN: "infoscreen"
 };
 
@@ -69,7 +80,6 @@ canDiv.width = WIDTH;
 
 
 function initialise() {
-	console.log(enitityEnums);
 	canDiv.addEventListener("click", clickReporter, false);
 	canDiv.addEventListener("mousemove", mouseMoveReporter, false);
 	canDiv.addEventListener("mouseout", mouseOutReporter, false);
@@ -118,7 +128,6 @@ function mouseWheelReporter(event)
 	if(event.deltaY < 0)
 	{
 		zoom += 0.05
-		console.log(screen2.entities.length);
 		var temp = screen2.entities[0];
 		temp.changeZoom(0.05);
 		
@@ -147,7 +156,6 @@ function mouseUpReporter(event)
 	if(mouseDown)
 	{
 		mouseDown = false;
-		console.log(screen2.entities.length);
 		var temp = screen2.entities[0];
 		temp.saveGlobalOffset();
 	}
@@ -223,8 +231,8 @@ function Screen(type)
 		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "TwoMethoxypropane"));
 		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "Isobutanol"));
 		
-		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3"));
-		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH"));
+		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3", "HydroAlide"));
+		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH", "WilliHesis"));
 		
 		var tempLine = new RoadMapLine(nodes[0], nodes[1], "blue", "Hydrolysis of an Alkyl Halide");
 		var tempInfo = new InfoScreen(720, 1080, tempLine);
@@ -354,21 +362,17 @@ function Menu()
 	{
 		if(mouseX > 0 && mouseX < (this.width / 15) && mouseY > 0 && mouseY < this.height)
 		{
-			console.log("Cool1.");
 		}
 		else if(mouseX > this.width - this.width / 15 && mouseX < this.width && mouseY > 0 && mouseY < this.height)
 		{
-			var index = 0;
-			console.log("Entities: " + screen2.entities.length);
-			while(index < screen2.entities.length && screen2.entities[index].id != "infoscreen")
+			for(var i = 0; i < screen2.entities.length; i++)
 			{
-				index = index + 1;
-			}
-			if(index < screen2.entities.length)
-			{
-				screen2.entities[index].updateVisible();
-				console.log("Should be working");
-				this.infoScreenCharacterIndex = (this.infoScreenCharacterIndex + 1) % 2;
+				if(screen2.entities[i].id == "infoscreen")
+				{
+					screen2.entities[i].updateVisible();
+					this.infoScreenCharacterIndex = (this.infoScreenCharacterIndex + 1) % 2;
+					break;
+				}
 			}
 		}
 	}
@@ -465,11 +469,21 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	
 	this.clickUpdate = function(mouseX, mouseY)
 	{
-		
+		if(this.inTheCircle(mouseX, mouseY))
+		{
+			for(var i = 0; i < screen2.entities.length; i++)
+			{
+				if(screen2.entities[i].id == "infoscreen")
+				{
+					screen2.entities[i].compoundMechanismOrNil = 1;
+					screen2.entities[i].reference = this.info.id;
+				}
+			}
+		}
 	}
 }
 
-function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
+function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap, id)
 {
 	Entity.call(this, -1, -1, 10, 10, color, entityEnums.ROADMAPLINE);
 	this.roadMap = new RoadMap([], []);
@@ -479,6 +493,7 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	this.toWidth = 10;
 	this.name = name;
 	this.color = color;
+	this.info = MechanismEnums[id];
 	
 	this.textAlpha = 1.0;
 	this.selected = false;
@@ -490,6 +505,7 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	
 	this.draw = function()
 	{
+		console.log(this.info);
 		var fromX = this.nodeFrom.offsetX + this.nodeFrom.x;
 		var toX = this.nodeTo.offsetX + this.nodeTo.x;
 		var fromY = this.nodeFrom.offsetY + this.nodeFrom.y;
@@ -615,12 +631,23 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap)
 	
 	this.clickUpdate = function(mouseX, mouseY)
 	{
-		
+		if(this.cursorOver(mouseX, mouseY) && !this.nodeTo.hovering && !this.nodeFrom.hovering)
+		{
+			for(var i = 0; i < screen2.entities.length; i++)
+			{
+				if(screen2.entities[i].id == "infoscreen")
+				{
+					screen2.entities[i].compoundMechanismOrNil = 2;
+					screen2.entities[i].reference = this.info.id;
+				}
+			}
+		}
 	}
 }
 
 function RoadMap(nodes, lines)
 {
+	Entity.call(this, -1, -1, -1, -1, "Pink", entityEnums.ROADMAP);
 	this.nodes = nodes;
 	this.numberOfNodes = nodes.length;
 	this.lines = lines;
@@ -688,7 +715,6 @@ function RoadMap(nodes, lines)
 	{
 		this.globalOffsetX = this.startGlobalOffsetX + x;
 		this.globalOffsetY = this.startGlobalOffsetY + y;
-		console.log(this.globalOffsetX);
 		for(var i = 0; i < this.nodes.length; i++)
 		{
 			this.nodes[i].getMap(this);
@@ -708,7 +734,15 @@ function RoadMap(nodes, lines)
 	
 	this.clickUpdate = function(mouseX, mouseY)
 	{
+		for(var i = 0; i < this.nodes.length; i++)
+		{
+			this.nodes[i].clickUpdate(mouseX, mouseY);
+		}
 		
+		for(var i = 0; i < this.lines.length; i++)
+		{
+			this.lines[i].clickUpdate(mouseX, mouseY);
+		}
 	}
 }
 
@@ -722,6 +756,7 @@ function InfoScreen(height, width, line)
 	Entity.call(this, width - 400, 25, 400, height - 25, "#add285", entityEnums.INFOSCREEN);
 	this.madeVisible = true;
 	this.compoundMechanismOrNil = 3; // Compound - 1 | Mechanism - 2 | Nil - 3
+	this.reference = "";
 	
 	this.INVISIBLEX = 1080;
 	this.VISIBLEX = 1080 - this.width;
@@ -735,7 +770,17 @@ function InfoScreen(height, width, line)
 			context.font = "40px Century Gothic";
 			context.fillStyle = "black";
 			context.textAlign = "left";
-			context.fillText("'Ello!", this.x + 10, this.y + 50, this.width - 20);
+			context.fillText(CompoundEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
+			var compoundImage = document.getElementById(this.reference);
+			context.drawImage(compoundImage, this.x + 10, this.y + 70);
+			
+		}
+		else if(this.compoundMechanismOrNil == 2)
+		{
+			context.font = "40px Century Gothic";
+			context.fillStyle = "black";
+			context.textAlign = "left";
+			//context.fillText(MechanismEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
 		}
 		else if(this.compoundMechanismOrNil == 3)
 		{
@@ -750,7 +795,6 @@ function InfoScreen(height, width, line)
 			+ " Until then, this little message will pop up! This is also a test for me to see if this font and the line breaks look nice."
 			+ " Obviously if you're seeing this, that's very much the case. Overall, I'm feeling a strong 8 to a light 9.", this.x + 10, this.y + 340, this.width - 20, 25);
 		}
-		//console.log(canDiv.width - 25, this.width);
 		context.fontcolor = "red";
 	}
 	
@@ -786,8 +830,6 @@ function InfoScreen(height, width, line)
 			if(this.madeVisible)
 			{
 				change = this.x - this.VISIBLEX;
-				console.log(this.x + "," + this.VISIBLEX);
-				console.log(change);
 			}
 			else
 			{
