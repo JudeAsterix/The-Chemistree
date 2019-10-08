@@ -2,12 +2,18 @@ var MechanismEnums = {
 	HydroAlide: {
 		id: "HydroAlide",
 		commonName: "Hydrolisis of an Alkyl Halide",
+		mainReactant: "Alkyl Halide",
+		sideReactants: "NaOH",
+		mainProduct: "Alcohol",
 		refImage: document.getElementById("HydroAlide")
 	},
 	WilliHesis: {
 		id: "WilliHesis",
 		commonName: "Williamson Synthesis",
-		refImage: document.getElementById("HydroAlide")
+		mainReactant: "Alkyl Halide",
+		sideReactants: "NaOR",
+		mainProduct: "Ether",
+		refImage: document.getElementById("WilliHesis")
 	}
 };
 
@@ -17,23 +23,26 @@ var CompoundEnums = {
 		commonName: "Isobutanol",
 		IUPACName: "2-Methyl-1-propanol",
 		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C",
+		meltingPoint: "-108°C (380 K)",
+		boilingPoint: "107.8°C (379.8 K)",
 		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	OneCloroTwoMethyl: {
 		id:"OneCloroTwoMethyl",
 		commonName: "1-Chloro-2-Methylpropane",
-		IUPACName: "2-Methyl-1-propanol",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C",
+		IUPACName: "1-Chloro-2-Methylpropane",
+		molecularWeight: "92.57 g/mol",
+		meltingPoint: "-131 °C (142 K)",
+		boilingPoint: "69 °C (342 K)",
 		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	TwoMethoxypropane: {
 		id:"TwoMethoxypropane",
 		commonName:"2-Methoxypropane",
-		IUPACName: "2-Methyl-1-propanol",
+		IUPACName: "2-Methoxypropane",
 		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108.0°C",
+		meltingPoint: "NA",
+		boilingPoint: "30.7°C (303.7 K)",
 		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	}, 
 };
@@ -238,8 +247,6 @@ function Screen(type)
 		
 		var tempLine = new RoadMapLine(nodes[0], nodes[1], "blue", "Hydrolysis of an Alkyl Halide");
 		var tempInfo = new InfoScreen(720, 1080, tempLine);
-		tempInfo.setText();
-		
 		this.entities.push(new RoadMap(nodes, lines));
 		this.entities.push(tempInfo);
 		
@@ -409,7 +416,10 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	this.offsetSpaceX = 0;
 	this.offsetSpaceY = 0;
 	this.info = CompoundEnums[imageId];
+	this.imageTransparancy = 0;
 	
+	const HOVER_TRANSPARANCY = 1;
+	const NONHOVER_TRANSPARANCY = 0;
 	const SMALL_SIZE = 10;
 	const BIG_SIZE = 20;
 	
@@ -419,9 +429,11 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 		context.beginPath();
 		context.arc((this.x + this.offsetX) * this.map.zoom + this.map.globalOffsetX, (this.y + this.offsetY) * this.map.zoom + this.map.globalOffsetY, this.width * this.map.zoom, this.height * this.map.zoom, 0, 2* Math.PI);
 		context.fill();
-		context.fillStyle = "rgba(255, 255, 255, 0.5)";
+		context.fillStyle = "rgba(255, 255, 255)";
+		context.globalAlpha = this.imageTransparancy;
 		context.fillRect((((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
 		context.drawImage(this.nodeImage, (((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
+		context.globalAlpha = 1.0;
 	}
 	
 	this.getMap = function(nodeMap)
@@ -442,6 +454,17 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 			var sizeChange = SMALL_SIZE - this.height;
 			this.height += sizeChange / 4;
 			this.width += sizeChange / 4;
+		}
+		
+		if(this.hovering && this.imageTransparancy != 1)
+		{
+			var transDifference = HOVER_TRANSPARANCY - this.imageTransparancy;
+			this.imageTransparancy = this.imageTransparancy + (transDifference / 4);
+		}
+		else if(!this.hoverinf && this.imageTransparency != 0)
+		{
+			var transDifference = this.imageTransparancy - NONHOVER_TRANSPARANCY;
+			this.imageTransparancy = this.imageTransparancy - (transDifference / 4);
 		}
 		
 		var differenceX = -Math.pow(((mouseX - this.x) / 150.0), 3.0) - this.offsetX;
@@ -477,6 +500,10 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 			{
 				if(screen2.entities[i].id == "infoscreen")
 				{
+					if(!screen2.entities[i].madeVisible)
+					{
+						screen2.entities[i].madeVisible = true;
+					}
 					screen2.entities[i].compoundMechanismOrNil = 1;
 					screen2.entities[i].reference = this.info.id;
 				}
@@ -525,7 +552,7 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 			context.rotate(deg);
 			context.translate(0, -20);
 			context.font = "12px Tahoma";
-			context.fillStyle = "rgba(0, 0, 0, " + this.textAlpha + ")";
+			context.fillStyle = "rgb(0, 0, 0)";
 			context.textAlign = "center";
 			context.fillText(this.name, 0, 0);
 			context.translate(0, 20);
@@ -554,14 +581,14 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 			if(this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_BIG || this.toWidth != WIDTH_BIG))
 			{
 				var sizeChange = WIDTH_BIG - this.fromWidth;
-				this.fromWidth = this.fromWidth + sizeChange / 6;
-				this.toWidth = this.toWidth + sizeChange / 6;
+				this.fromWidth = this.fromWidth + sizeChange / 2;
+				this.toWidth = this.toWidth + sizeChange / 2;
 			}
 			else if(!this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL))
 			{
 				var sizeChange = this.fromWidth - WIDTH_SMALL;
-				this.fromWidth = this.fromWidth - sizeChange / 6;
-				this.toWidth = this.toWidth - sizeChange / 6;
+				this.fromWidth = this.fromWidth - sizeChange / 2;
+				this.toWidth = this.toWidth - sizeChange / 2;
 			}
 		}
 		else if(this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL)
@@ -638,6 +665,10 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 			{
 				if(screen2.entities[i].id == "infoscreen")
 				{
+					if(!screen2.entities[i].madeVisible)
+					{
+						screen2.entities[i].madeVisible = true;
+					}
 					screen2.entities[i].compoundMechanismOrNil = 2;
 					screen2.entities[i].reference = this.info.id;
 				}
@@ -774,7 +805,11 @@ function InfoScreen(height, width, line)
 			context.fillText(CompoundEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
 			var compoundImage = document.getElementById(this.reference);
 			context.drawImage(compoundImage, this.x + 10, this.y + 70);
-			
+			context.font = "15px Century Gothic";
+			context.fillText("IUPAC Name: " + CompoundEnums[this.reference].IUPACName, this.x + 10, this.y + 90 + compoundImage.height);
+			context.fillText("Molecular Weight: " + CompoundEnums[this.reference].molecularWeight, this.x + 10, this.y + 110 + compoundImage.height);
+			context.fillText("Melting Point: " + CompoundEnums[this.reference].meltingPoint, this.x + 10, this.y + 130 + compoundImage.height);
+			context.fillText("Boiling Point: " + CompoundEnums[this.reference].boilingPoint, this.x + 10, this.y + 150 + compoundImage.height);
 		}
 		else if(this.compoundMechanismOrNil == 2)
 		{
@@ -840,14 +875,6 @@ function InfoScreen(height, width, line)
 			}
 			
 			this.x -= change / 5;
-		}
-	}
-	
-	this.setText = function()
-	{
-		if(this.compoundMechanismOrNil == 3)
-		{
-			this.infoText = "If you see this, you got yourself an empty thing!"
 		}
 	}
 	
