@@ -1,11 +1,13 @@
 var MechanismEnums = {
 	HydroAlide: {
 		id: "HydroAlide",
-		commonName: "Hydrolisis of an Alkyl Halide"
+		commonName: "Hydrolisis of an Alkyl Halide",
+		refImage: document.getElementById("HydroAlide")
 	},
 	WilliHesis: {
 		id: "WilliHesis",
-		commonName: "Williamson Synthesis"
+		commonName: "Williamson Synthesis",
+		refImage: document.getElementById("HydroAlide")
 	}
 };
 
@@ -483,7 +485,7 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	}
 }
 
-function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap, id)
+function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 {
 	Entity.call(this, -1, -1, 10, 10, color, entityEnums.ROADMAPLINE);
 	this.roadMap = new RoadMap([], []);
@@ -505,7 +507,6 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, roadMap, id)
 	
 	this.draw = function()
 	{
-		console.log(this.info);
 		var fromX = this.nodeFrom.offsetX + this.nodeFrom.x;
 		var toX = this.nodeTo.offsetX + this.nodeTo.x;
 		var fromY = this.nodeFrom.offsetY + this.nodeFrom.y;
@@ -780,7 +781,9 @@ function InfoScreen(height, width, line)
 			context.font = "40px Century Gothic";
 			context.fillStyle = "black";
 			context.textAlign = "left";
-			//context.fillText(MechanismEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
+			context.fillText(MechanismEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
+			var mechanismImage = MechanismEnums[this.reference].refImage;
+			context.drawImage(mechanismImage, this.x + 10, this.y + 70);
 		}
 		else if(this.compoundMechanismOrNil == 3)
 		{
