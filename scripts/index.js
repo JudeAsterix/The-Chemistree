@@ -2,20 +2,36 @@ var MechanismEnums = {
 	HydroAlide: {
 		id: "HydroAlide",
 		commonName: "Hydrolisis of an Alkyl Halide",
-		mainReactant: "Alkyl Halide",
+		mainReactant: "Primary/Secondary Alkyl Halide",
 		sideReactants: "NaOH",
-		mainProduct: "Alcohol",
-		refImage: document.getElementById("HydroAlide")
+		mainProduct: "Alcohol"
 	},
 	WilliHesis: {
 		id: "WilliHesis",
 		commonName: "Williamson Synthesis",
-		mainReactant: "Alkyl Halide",
+		mainReactant: "Primary/Secondary Alkyl Halide",
 		sideReactants: "NaOR",
-		mainProduct: "Ether",
-		refImage: document.getElementById("WilliHesis")
+		mainProduct: "Ether"
+	},
+	NitriAlide: {
+		id: "NitriAlide",
+		commonName: "Nitrile Synthesis Via Alkyl Halide",
+		mainReactant: "Primary/Secondary Alkyl Halide",
+		sideReactants: "NaCN",
+		mainProduct: "Nitrile"
+	},
+	ThiolAlide: {
+		id: "ThiolAlide",
+		commonName: "Thiol Synthesis Via Alkyl Halide", 
+		mainReactant: "Primary/Secondary Alkyl Halide",
+		sideReactants: "NaSH",
+		mainProdict: "Thiol"
 	}
 };
+
+/**
+	|====== Compound Enumerations! ====== |
+**/
 
 var CompoundEnums = {
 	Isobutanol: {
@@ -50,10 +66,10 @@ var CompoundEnums = {
 		meltingPoint: "NA",
 		boilingPoint: "30.7°C (303.7 K)",
 	},
-	IsopropylCyanide: {
-		id:"IsopropylCyanide",
-		commonName:"Isopropyl Cyanide",
-		IUPACName: "2-Methoxypropane",
+	IsovaleroNitrile: {
+		id:"IsovaleroNitrile",
+		commonName:"Isovaleronitrile",
+		IUPACName: "3-Methylbutanenitrile",
 		molecularWeight: "74.12 g/mol",
 		meltingPoint: "NA",
 		boilingPoint: "30.7°C (303.7 K)",
@@ -263,11 +279,12 @@ function Screen(type)
 		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "TwoMethoxypropane"));
 		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "Isobutanol"));
 		nodes.push(new RoadMapNode(300, -20, "rgb(0, 200, 200)", "the", "IsobutylAcetate"));
-		nodes.push(new RoadMapNode(400, 50, "rgb(0, 200, 200)", "the", "IsopropylCyanide"));
+		nodes.push(new RoadMapNode(400, 50, "rgb(0, 200, 200)", "the", "IsovaleroNitrile"));
 		nodes.push(new RoadMapNode(200, 50, "rgb(0, 200, 200)", "the", "TwoMethylOnePropanethiol"));
 		
 		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3", "HydroAlide"));
 		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH", "WilliHesis"));
+		lines.push(new RoadMapLine(nodes[0], nodes[4], "red", "NaCN", "NitriAlide"));
 		
 		var tempLine = new RoadMapLine(nodes[0], nodes[1], "blue", "Hydrolysis of an Alkyl Halide");
 		var tempInfo = new InfoScreen(720, 1080, tempLine);
@@ -841,7 +858,7 @@ function InfoScreen(height, width, line)
 			context.fillStyle = "black";
 			context.textAlign = "left";
 			context.fillText(MechanismEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
-			var mechanismImage = MechanismEnums[this.reference].refImage;
+			var mechanismImage = document.getElementById(this.reference);
 			context.drawImage(mechanismImage, this.x + 10, this.y + 70);
 		}
 		else if(this.compoundMechanismOrNil == 3)
