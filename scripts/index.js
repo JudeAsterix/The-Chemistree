@@ -25,7 +25,6 @@ var CompoundEnums = {
 		molecularWeight: "74.12 g/mol",
 		meltingPoint: "-108°C (380 K)",
 		boilingPoint: "107.8°C (379.8 K)",
-		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	OneCloroTwoMethyl: {
 		id:"OneCloroTwoMethyl",
@@ -34,7 +33,6 @@ var CompoundEnums = {
 		molecularWeight: "92.57 g/mol",
 		meltingPoint: "-131 °C (142 K)",
 		boilingPoint: "69 °C (342 K)",
-		refImage: document.getElementById("OneCloroTwoMethyl-b")
 	},
 	TwoMethoxypropane: {
 		id:"TwoMethoxypropane",
@@ -43,8 +41,31 @@ var CompoundEnums = {
 		molecularWeight: "74.12 g/mol",
 		meltingPoint: "NA",
 		boilingPoint: "30.7°C (303.7 K)",
-		refImage: document.getElementById("OneCloroTwoMethyl-b")
-	}, 
+	},
+	IsobutylAcetate: {
+		id:"IsobutylAcetate",
+		commonName:"Isobutyl Acetate",
+		IUPACName: "2-Methoxypropane",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "NA",
+		boilingPoint: "30.7°C (303.7 K)",
+	},
+	IsopropylCyanide: {
+		id:"IsopropylCyanide",
+		commonName:"Isopropyl Cyanide",
+		IUPACName: "2-Methoxypropane",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "NA",
+		boilingPoint: "30.7°C (303.7 K)",
+	},
+	TwoMethylOnePropanethiol: {
+		id:"TwoMethylOnePropanethiol",
+		commonName:"2-Methyl-1-Propanethiol",
+		IUPACName: "2-Methoxypropane",
+		molecularWeight: "74.12 g/mol",
+		meltingPoint: "NA",
+		boilingPoint: "30.7°C (303.7 K)",
+	},
 };
 
 var entityEnums = {
@@ -241,6 +262,9 @@ function Screen(type)
 		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)", "the", "OneCloroTwoMethyl"));
 		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "TwoMethoxypropane"));
 		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "Isobutanol"));
+		nodes.push(new RoadMapNode(300, -20, "rgb(0, 200, 200)", "the", "IsobutylAcetate"));
+		nodes.push(new RoadMapNode(400, 50, "rgb(0, 200, 200)", "the", "IsopropylCyanide"));
+		nodes.push(new RoadMapNode(200, 50, "rgb(0, 200, 200)", "the", "TwoMethylOnePropanethiol"));
 		
 		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3", "HydroAlide"));
 		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH", "WilliHesis"));
