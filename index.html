@@ -14,20 +14,68 @@
 		<canvas id = "canvas" onclick = 'clickReporter(event)' onmousemove = "mouseMoveReporter(event)" onmouseout = "mouseOutReporter(event)" onmousewheel = "mouseWheelReporter(event)" onmousedown = "mouseDownReporter(event)" onmouseup = "mouseUpReporter(event)"></canvas>
 	</div>
 	<div id = "imageDiv">
-		<img src = "images/molecules/1-Chloro-2-Methylpropane.png" id = "OneCloroTwoMethyl" style = "display:none" />
-		<img src = "images/molecules/2-Methoxypropane.png" id = "TwoMethoxypropane" style = "display:none" />
-		<img src = "images/molecules/Isobutanol.png" id = "Isobutanol" style = "display:none" />
-		<img src = "images/molecules/IsobutylAcetate.png" id = "IsobutylAcetate" style = "display:none" />
-		<img src = "images/molecules/IsovaleroNitrile.png" id = "IsovaleroNitrile" style = "display:none" />
-		<img src = "images/molecules/TwoMethylOnePropanethiol.png" id = "TwoMethylOnePropanethiol" style = "display:none" />
+	
+		<!--Molecule Group-->
+		<img src = "images/molecules/1-Chloro-2-Methylpropane.png" id = "Secondary-Alkyl-Halide-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Methoxypropane.png" id = "Ether-1-icon" style = "display:none" />
+		<img src = "images/molecules/Isobutanol.png" id = "Secondary-Alcohol-1-icon" style = "display:none" />
+		<img src = "images/molecules/IsobutylAcetate.png" id = "Ester-1-icon" style = "display:none" />
+		<img src = "images/molecules/IsovaleroNitrile.png" id = "Secondary-Nitrile-1-icon" style = "display:none" />
+		<img src = "images/molecules/TwoMethylOnePropanethiol.png" id = "Secondary-Thiol-1-icon" style = "display:none" />
+		<img src = "images/molecules/1-pentene.png" id = "Straight-Alkene-1-icon" style = "display:none" />
+		<img src = "images/molecules/1-MethylButylTosylate.png" id = "Secondary-Tosylate-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Bromo-2-methylpentane.png" id = "Tertiary-Alkyl-Halide-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Methyl-2-butanol.png" id = "Tertiary-Alcohol-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Methylbutan-2-yl 4-methylbenzenesulfonate.png" id = "Tertiary-Tosylate-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Methyl-2-butene.png" id = "Branched-Alkene-2-icon" style = "display:none" />
+		<img src = "images/molecules/2-Methyl-1-butene.png" id = "Branched-Alkene-1-icon" style = "display:none" />
+		<img src = "images/molecules/isopentane.png" id = "Alkane-1-icon" style = "display:none" />
+		<img src = "images/molecules/2-Bromo-3-MethylButane.png" id = "Secondary-Alkyl-Halide-2-icon" style = "display:none" />
+		<img src = "images/molecules/Secondary-Alcohol-2.png" id = "Secondary-Alcohol-2-icon" style = "display:none" />
+		<img src = "images/molecules/Diol-1.png" id = "Diol-1-icon" style = "display:none" />
 		
-		<img src = "images/molecules/1-Chloro-2-Methylpropane-b.png" id = "OneCloroTwoMethyl-b" style = "display:none" />
+		<!--Molecule Sheets Group -->
+		<img src = "images/molecule-sheets/Branched-Alkene-1.png" id = "Branched-Alkene-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Branched-Alkene-2.png" id = "Branched-Alkene-2" style = "display:none" />
+		<img src = "images/molecule-sheets/Ether-1.png" id = "Ether-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Ester-1.png" id = "Ester-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Alcohol-1.png" id = "Secondary-Alcohol-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Alkyl-Halide-1.png" id = "Secondary-Alkyl-Halide-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Alkyl-Halide-2.png" id = "Secondary-Alkyl-Halide-2" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Nitrile-1.png" id = "Secondary-Nitrile-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Thiol-1.png" id = "Secondary-Thiol-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Tosylate-1.png" id = "Secondary-Tosylate-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Straight-Alkene-1.png" id = "Straight-Alkene-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Tertiary-Alcohol-1.png" id = "Tertiary-Alcohol-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Tertiary-Alkyl-Halide-1.png" id = "Tertiary-Alkyl-Halide-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Tertiary-Tosylate-1.png" id = "Tertiary-Tosylate-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Alkane-1.png" id = "Alkane-1" style = "display:none" />
+		<img src = "images/molecule-sheets/Secondary-Alcohol-2.png" id = "Secondary-Alcohol-2" style = "display:none" />
+		<img src = "images/molecule-sheets/Diol-1.png" id = "Diol-1" style = "display:none" />
 
-		<img src = "images/mechanisms/HydroAlide.png" id = "HydroAlide" style = "display:none" />
-		<img src = "images/mechanisms/WilliHesis.png" id = "WilliHesis" style = "display:none" />
-		<img src = "images/mechanisms/NitriAlide.png" id = "NitriAlide" style = "display:none" />
-
+		<img src = "images/mechanism-sheets/HydroAlide.png" id = "HydroAlide" style = "display:none" />
+		<img src = "images/mechanism-sheets/WilliHesis.png" id = "WilliHesis" style = "display:none" />
+		<img src = "images/mechanism-sheets/NitriAlide.png" id = "NitriAlide" style = "display:none" />
+		<img src = "images/mechanism-sheets/ThiolAlide.png" id = "ThiolAlide" style = "display:none" />
+		<img src = "images/mechanism-sheets/EsterAlide.png" id = "EsterAlide" style = "display:none" />
+		<img src = "images/mechanism-sheets/HoffmAtion.png" id = "HoffmAtion" style = "display:none" />
+		<img src = "images/mechanism-sheets/AlkylCohol.png" id = "AlkylCohol" style = "display:none" />
+		<img src = "images/mechanism-sheets/TosylCohol.png" id = "TosylCohol" style = "display:none" />
+		<img src = "images/mechanism-sheets/HydroYlate.png" id = "HydroYlate" style = "display:none" />
+		<img src = "images/mechanism-sheets/AlkenYlate.png" id = "AlkenYlate" style = "display:none" />
+		<img src = "images/mechanism-sheets/AlkenCohol.png" id = "AlkenCohol" style = "display:none" />
+		<img src = "images/mechanism-sheets/AlkenCohol.png" id = "AlkenCohol" style = "display:none" />
+		
+		<img src = "images/mechanism-sheets/HydroAlideT.png" id = "HydroAlideT" style = "display:none" />
+		<img src = "images/mechanism-sheets/AlkylCoholT.png" id = "AlkylCoholT" style = "display:none" />
+		<img src = "images/mechanism-sheets/E1-Eli-H.png" id = "E1EliH" style = "display:none" />
+		<img src = "images/mechanism-sheets/E1-Eli-Z.png" id = "E1EliZ" style = "display:none" />
+		<img src = "images/mechanism-sheets/E1-Eli-Ts-Z.png" id = "E1EliTsZ" style = "display:none" />
+		
+		<img src = "images/legend.png" id = "Legend" style = "display:none" />
+		
 		<img src = "images/puppy-computer.jpg" id = "cute-puppy" style = "display:none" />
+		<img src = "images/Chemistree-Credits.png" id = "Chemistree-Credits" style = "display:none" />
 	</div>
    <script src="scripts/index.js"></script>
 </body>
