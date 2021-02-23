@@ -1,89 +1,3 @@
-var MechanismEnums = {
-	HydroAlide: {
-		id: "HydroAlide",
-		commonName: "Hydrolisis of an Alkyl Halide",
-		mainReactant: "Primary/Secondary Alkyl Halide",
-		sideReactants: "NaOH",
-		mainProduct: "Alcohol"
-	},
-	WilliHesis: {
-		id: "WilliHesis",
-		commonName: "Williamson Synthesis",
-		mainReactant: "Primary/Secondary Alkyl Halide",
-		sideReactants: "NaOR",
-		mainProduct: "Ether"
-	},
-	NitriAlide: {
-		id: "NitriAlide",
-		commonName: "Nitrile Synthesis Via Alkyl Halide",
-		mainReactant: "Primary/Secondary Alkyl Halide",
-		sideReactants: "NaCN",
-		mainProduct: "Nitrile"
-	},
-	ThiolAlide: {
-		id: "ThiolAlide",
-		commonName: "Thiol Synthesis Via Alkyl Halide", 
-		mainReactant: "Primary/Secondary Alkyl Halide",
-		sideReactants: "NaSH",
-		mainProdict: "Thiol"
-	}
-};
-
-/**
-	|====== Compound Enumerations! ====== |
-**/
-
-var CompoundEnums = {
-	Isobutanol: {
-		id: "Isobutanol",
-		commonName: "Isobutanol",
-		IUPACName: "2-Methyl-1-propanol",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "-108°C (380 K)",
-		boilingPoint: "107.8°C (379.8 K)",
-	},
-	OneCloroTwoMethyl: {
-		id:"OneCloroTwoMethyl",
-		commonName: "1-Chloro-2-Methylpropane",
-		IUPACName: "1-Chloro-2-Methylpropane",
-		molecularWeight: "92.57 g/mol",
-		meltingPoint: "-131 °C (142 K)",
-		boilingPoint: "69 °C (342 K)",
-	},
-	TwoMethoxypropane: {
-		id:"TwoMethoxypropane",
-		commonName:"2-Methoxypropane",
-		IUPACName: "2-Methoxypropane",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "NA",
-		boilingPoint: "30.7°C (303.7 K)",
-	},
-	IsobutylAcetate: {
-		id:"IsobutylAcetate",
-		commonName:"Isobutyl Acetate",
-		IUPACName: "2-Methoxypropane",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "NA",
-		boilingPoint: "30.7°C (303.7 K)",
-	},
-	IsovaleroNitrile: {
-		id:"IsovaleroNitrile",
-		commonName:"Isovaleronitrile",
-		IUPACName: "3-Methylbutanenitrile",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "NA",
-		boilingPoint: "30.7°C (303.7 K)",
-	},
-	TwoMethylOnePropanethiol: {
-		id:"TwoMethylOnePropanethiol",
-		commonName:"2-Methyl-1-Propanethiol",
-		IUPACName: "2-Methoxypropane",
-		molecularWeight: "74.12 g/mol",
-		meltingPoint: "NA",
-		boilingPoint: "30.7°C (303.7 K)",
-	},
-};
-
 var entityEnums = {
 	SCREEN: "screen",
 	MENU: "menu",
@@ -91,7 +5,9 @@ var entityEnums = {
 	ROADMAPNODE: "roadmapnode",
 	ROADMAPLINE: "roadmapline",
 	ROADMAP: "roadmap",
-	INFOSCREEN: "infoscreen"
+	INFOSCREEN: "infoscreen",
+	CREDITSSCREEN: "creditsscreen",
+	LEGEND: "legend"
 };
 
 /*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -101,8 +17,7 @@ var entityEnums = {
 
 var canDiv = document.getElementById("canvas");
 var context = canDiv.getContext("2d");
-var screen1 = new Screen(0);
-var screen2 = new Screen(1);
+var screens = [new Screen(1), new Screen(0), new Screen(2)];
 var mouseDown = false;
 var mouseOnNode = false;
 var mouseOnLine = false;
@@ -148,7 +63,12 @@ function clickReporter(event)
 	var rect = canDiv.getBoundingClientRect();
 	mouseX = event.clientX - rect.left;
 	mouseY = event.clientY - rect.top;
-	screen2.clickUpdate(mouseX, mouseY);
+	
+	for(var i = 0; i < screens.length; i++)
+	{
+		screens[i].clickUpdate(mouseX, mouseY);
+	}
+	
 }
 
 function mouseMoveReporter(event)
@@ -160,7 +80,7 @@ function mouseMoveReporter(event)
 	
 	if(mouseDown)
 	{
-		var temp = screen2.entities[0];
+		var temp = screens[0].entities[0];
 		temp.changeGlobalOffset(-dragX + mouseX, -dragY + mouseY);
 	}
 }
@@ -172,18 +92,18 @@ function mouseOutReporter(event)
 
 function mouseWheelReporter(event)
 {
-	
+	console.log("mouse");
 	if(event.deltaY < 0)
 	{
-		zoom += 0.05
-		var temp = screen2.entities[0];
+		zoom += 0.05;
+		var temp = screens[1].entities[0];
 		temp.changeZoom(0.05);
 		
 	}
 	else if(event.deltaY > 0 && zoom > 0.25)
 	{
-		zoom -= 0.05
-		var temp = screen2.entities[0];
+		zoom -= 0.05;
+		var temp = screens[1].entities[0];
 		temp.changeZoom(-0.05);
 	}
 }
@@ -204,7 +124,7 @@ function mouseUpReporter(event)
 	if(mouseDown)
 	{
 		mouseDown = false;
-		var temp = screen2.entities[0];
+		var temp = screens[0].entities[0];
 		temp.saveGlobalOffset();
 	}
 }
@@ -216,14 +136,30 @@ function mouseUpReporter(event)
 
 function draw() {
 	context.fillStyle = "rgb(0, 0, 0)";
-	screen2.draw(mouseX, mouseY);
+	for(var i = 0; i < screens.length; i++)
+	{
+		screens[i].draw(mouseX, mouseY);
+	}
 	update();
 }
 
 function update()
 {
-	screen2.update(mouseX, mouseY, onScreen);
+	for(var i = 0; i < screens.length; i++)
+	{
+		screens[i].update(mouseX, mouseY, onScreen);
+	}
 }
+
+/**
+	Representing any entity onscreen
+	
+	@param {integer} x - The X value.
+	@param {integer} y - The Y value.
+	@param {integer} width - The width of the entity in pixels
+	@param {integer} height - The height of the entity in pixels
+	@param {name} id - The type of class the entity is
+*/
 
 function Entity(x, y, width, height, color, id)
 {
@@ -233,28 +169,39 @@ function Entity(x, y, width, height, color, id)
 	this.height = height;
 	this.id = id;
 	
+	/**
+		Draw the entity onscreen
+	*/
 	this.draw = function()
 	{
 		context.fillStyle = "red";
 		context.fillRect(this.x, this.y, this.width, this.height);
 	}
 	
-	this.draw = function(mouseX, mouseY)
-	{
-	}
-	
-	this.update = function(mouseX, mouseY, mouseOut)
-	{}
-	
-	this.clickUpdate = function(mouseX, mouseY)
-	{
-	}
-	
+	/**
+		Return the ID of the entity
+		@return {name} id - The type of class the entity is
+	*/
 	this.getID = function()
 	{
 		return this.id;
 	}
 }
+
+
+/**
+	The screen that will be displayed; The type of screen will determine what is being displayed.
+	
+	@param {boolean} isShown - Whether or not the screen should be visible
+	@param {type} - The type of screen that displays
+		0 - Title Screen
+		1 - Road Map Screen
+		2 - Search Screen
+	@param {Entity[]} entities - A list of entities that are displayed with the screen
+	@param {boolean} droppedDown - Whether or not the screen has been dropped down
+		[Note - This is different from isShown, as isShown determines whether the screen is visible, while droppedDown determines whether the slide down animation has completed.
+	@param {integer} verticalShift - How much from the top of the screen the top of the screen is
+*/
 
 function Screen(type)
 {
@@ -263,11 +210,22 @@ function Screen(type)
 	this.entities = [];
 	this.droppedDown;
 	this.verticalShift = 0;
+	
+	/**Screen is an entity with the following initial properties
+			x - 0
+			y - 0
+			height - Height of the canvas
+			width - Width of the canvas
+			color - A pale dark green color
+			id - SCREEN
+	*/
 	Entity.call(this, 0, 0, canDiv.height, canDiv.width, "rgb(109, 137, 107)", entityEnums.SCREEN);	
 	
 	if(this.type == 0)
 	{
 		this.droppedDown = false;
+		this.entities.push(new CreditsScreen());
+		this.isShown = true;
 	}
 	else if(this.type == 1)
 	{
@@ -275,41 +233,75 @@ function Screen(type)
 		var lines = [];
 		this.droppedDown = true;
 		
-		nodes.push(new RoadMapNode(300, 150, "rgb(0, 200, 200)", "the", "OneCloroTwoMethyl"));
-		nodes.push(new RoadMapNode(400, 250, "rgb(0, 200, 200)", "the", "TwoMethoxypropane"));
-		nodes.push(new RoadMapNode(200, 250, "rgb(0, 200, 200)", "the", "Isobutanol"));
-		nodes.push(new RoadMapNode(300, -20, "rgb(0, 200, 200)", "the", "IsobutylAcetate"));
-		nodes.push(new RoadMapNode(400, 50, "rgb(0, 200, 200)", "the", "IsovaleroNitrile"));
-		nodes.push(new RoadMapNode(200, 50, "rgb(0, 200, 200)", "the", "TwoMethylOnePropanethiol"));
+		nodes.push(new RoadMapNode(300, 150, "#0a6634", "Secondary-Alkyl-Halide-1"));
+		nodes.push(new RoadMapNode(400, 250, "#f27e3f", "Ether-1"));
+		nodes.push(new RoadMapNode(200, 250, "#9e0505", "Secondary-Alcohol-1"));
+		nodes.push(new RoadMapNode(300, 0, "#633b26", "Ester-1"));
+		nodes.push(new RoadMapNode(400, 50, "#180f6b", "Secondary-Nitrile-1"));
+		nodes.push(new RoadMapNode(200, 50, "#f2c11f", "Secondary-Thiol-1"));
+		nodes.push(new RoadMapNode(100, 75, "#8c8c8c", "Straight-Alkene-1"));
+		nodes.push(new RoadMapNode(150, 160, "#9f26e0", "Secondary-Tosylate-1"));
+		nodes.push(new RoadMapNode(500, 125, "#0a6634", "Tertiary-Alkyl-Halide-1"));
+		nodes.push(new RoadMapNode(650, 60, "#9e0505", "Tertiary-Alcohol-1"));
+		nodes.push(new RoadMapNode(750, 200, "#9f26e0", "Tertiary-Tosylate-1"));
+		nodes.push(new RoadMapNode(650, 300, "#8c8c8c", "Branched-Alkene-2"));
+		nodes.push(new RoadMapNode(550, 260, "#8c8c8c", "Branched-Alkene-1"));
+		nodes.push(new RoadMapNode(580, 350, "#ffffff", "Alkane-1"));
+		nodes.push(new RoadMapNode(600, 410, "#0a6634", "Secondary-Alkyl-Halide-2"));
+		nodes.push(new RoadMapNode(700, 350, "#9e0505", "Secondary-Alcohol-2"));
+		nodes.push(new RoadMapNode(800, 300, "#9e0505", "Diol-1"));
 		
-		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOCH3", "HydroAlide"));
-		lines.push(new RoadMapLine(nodes[0], nodes[2], "purple", "NaOH", "WilliHesis"));
-		lines.push(new RoadMapLine(nodes[0], nodes[4], "red", "NaCN", "NitriAlide"));
+		lines.push(new RoadMapLine(nodes[0], nodes[2], "red", "NaOH", "HydroAlide", true));
+		lines.push(new RoadMapLine(nodes[2], nodes[0], "blue", "HBr", "AlkylCohol", true));
+		lines.push(new RoadMapLine(nodes[0], nodes[1], "red", "NaOR", "WilliHesis", false));
+		lines.push(new RoadMapLine(nodes[0], nodes[3], "red", "NaOOR", "EsterAlide", false));
+		lines.push(new RoadMapLine(nodes[0], nodes[4], "red", "NaCN", "NitriAlide", false));
+		lines.push(new RoadMapLine(nodes[0], nodes[5], "red", "NaSH", "ThiolAlide", false));
+		lines.push(new RoadMapLine(nodes[0], nodes[6], "red", "HBr/t-BuOK", "HoffmAtion", false));
+		lines.push(new RoadMapLine(nodes[2], nodes[7], "red", "TsCl, py", "TosylCohol", true));
+		lines.push(new RoadMapLine(nodes[7], nodes[2], "red", "NaOH", "HydroYlate", true));
+		lines.push(new RoadMapLine(nodes[7], nodes[6], "red", "t-BuOK", "AlkenYlate", false));
+		
+		lines.push(new RoadMapLine(nodes[8], nodes[11], "blue", "t-BuOK", "E1EliH", false));
+		lines.push(new RoadMapLine(nodes[8], nodes[12], "blue", "NaOH", "E1EliZ", false));
+		lines.push(new RoadMapLine(nodes[8], nodes[9], "red", "H2O", "HydroAlideT", true));
+		lines.push(new RoadMapLine(nodes[9], nodes[8], "red", "HBr", "AlkylCoholT", true));
+		lines.push(new RoadMapLine(nodes[9], nodes[10], "grey", "N/A", "HoffmAtion", false));
+		lines.push(new RoadMapLine(nodes[9], nodes[11], "blue", "conc. H2SO4", "AlkenCohol", false));
+		lines.push(new RoadMapLine(nodes[10], nodes[11], "blue", "NaOH", "E1EliTsZ", false));
+		lines.push(new RoadMapLine(nodes[10], nodes[12], "grey", "N/A", "HoffmAtion", false));
 		
 		var tempLine = new RoadMapLine(nodes[0], nodes[1], "blue", "Hydrolysis of an Alkyl Halide");
 		var tempInfo = new InfoScreen(720, 1080, tempLine);
+		var legend = new Legend(720);
 		this.entities.push(new RoadMap(nodes, lines));
 		this.entities.push(tempInfo);
-		
+		this.entities.push(legend);
 		this.isShown = true;
 	}
-	this.entities.push(new Menu());
+	else if(this.type = 2)
+	{
+		this.entities.push(new Menu());
+	}
+	
+	/**
+		Draw the screen... onscreen
+		
+		@param {int} mouseX - The x coordinate of the mouse
+		@param {int} mouseY - The y coordinate of the mouse
+	*/
 	this.draw = function(mouseX, mouseY)
 	{
-		var frontGrad = context.createLinearGradient(0, 0, 0, 360);
-		if(this.type == 0)
+		
+		if(this.type == 1)
 		{
-			frontGrad.addColorStop(0, "#5a9d2d");
-			frontGrad.addColorStop(1, "rgb(56, 216, 155)");
-		}
-		else
-		{
+			var frontGrad = context.createLinearGradient(0, 0, 0, 360);
 			frontGrad.addColorStop(0, "#5a9d2d");
 			frontGrad.addColorStop(1, "#ecf5ed");
+			context.fillStyle = frontGrad;
+			context.fillRect(0, 0, 1080, 720);
+			context.fillRect(0, 0, canDiv.width, canDiv.height);
 		}
-		context.fillStyle = frontGrad;
-		context.fillRect(0, 0, 1080, 720);
-		context.fillRect(0, 0, canDiv.width, canDiv.height);
 		
 		for(var i = 0; i < this.entities.length; i++)
 		{
@@ -317,6 +309,13 @@ function Screen(type)
 		}
 	}
 	
+	/**
+		Updates all of the components of the screen with every tick
+		
+		@param {int} mouseX - The x coordinate of the mouse
+		@param {int} mouseY - The y coordinate of the mouse
+		@param {boolean} mouseOver - Whether or not the mouse is on the canvas or not
+	*/
 	this.update = function(mouseX, mouseY, mouseOver)
 	{
 		for(var i = 0; i < this.entities.length; i++)
@@ -325,6 +324,12 @@ function Screen(type)
 		}
 	}
 	
+	/**
+		Updates all of the components of the screen if the mouse is clicked
+		
+		@param {int} mouseX - The x coordinate of the mouse
+		@param {int} mouseY - The y coordinate of the mouse
+	*/
 	this.clickUpdate = function(mouseX, mouseY)
 	{
 		for(var i = 0; i < this.entities.length; i++)
@@ -334,11 +339,17 @@ function Screen(type)
 	}
 }
 
-/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-             This section is for the main menu screen.
-  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+/**
+	Displays the top menu
+	
+	@param {boolean} dropDownHighlighted - Whether or not the button that drops another screen down is highlighted
+	@param {boolean} infoScreenHighlighted - Whether or not the button that toggles the info screen in highlighted
+	@param {String} infoScreenCharacter - A list of characters shown under certain conditions when the button is displayed
+		Indexices:
+			[0] - Infoscreen (Closed)
+			[1] - Infoscreen (Open)
+	@param {integer} infoScreenCharacterIndex - The current character shown for the Info Screen Button
 */
-
 function Menu()
 {
 	Entity.call(this, 0, 0, 1080, 25, "#38630e", entityEnums.MENU);
@@ -412,14 +423,15 @@ function Menu()
 	{
 		if(mouseX > 0 && mouseX < (this.width / 15) && mouseY > 0 && mouseY < this.height)
 		{
+			screens[1].entities[0].targetY = (screens[1].entities[0].targetY + canvas.height) % (canvas.height * 2);
 		}
 		else if(mouseX > this.width - this.width / 15 && mouseX < this.width && mouseY > 0 && mouseY < this.height)
 		{
-			for(var i = 0; i < screen2.entities.length; i++)
+			for(var i = 0; i < screens[0].entities.length; i++)
 			{
-				if(screen2.entities[i].id == "infoscreen")
+				if(screens[0].entities[i].id == "infoscreen")
 				{
-					screen2.entities[i].updateVisible();
+					screens[0].entities[i].updateVisible();
 					this.infoScreenCharacterIndex = (this.infoScreenCharacterIndex + 1) % 2;
 					break;
 				}
@@ -438,38 +450,64 @@ function Menu()
 	}
 }
 
-/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  =          This section is for the visual road-map             =
-  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+/**
+	The node of a compound
+	@param {image} nodeImage - An image of the respective compound
+	@param {color} color - The color of the node
+	@param {integer} offsetX - The additional X value of the node depending on the mouses direction
+	@param {integer} offsetY - The additional Y value of the node depending on the mouses direction
+	@param {boolean} clicked - Whether or not the node has been clicked
+	@param {RoadMap} map - The map that contains the respective node
+	@param {boolean} hovering - Whether or not the cursor is hovering over the node
+	@param {CompoundEnum} info - Any info for the respective compound
+	@param {double} imageTransparancy - The transparency of the image when shown
+	
+	@constant {integer} HOVER_TRANSPARENCY - The maximum transparency the image may have when hovered over
+		:1
+	@constant {integer} NONHOVER_TRANSPARENCY - The minimum transparency the image may have when not hovered over
+		:0
+	@constant SMALL_SIZE - The minimum length the node may be.
+		:10
+	@constant BIG_SIZE - The maximum length the node may be.
+		:20
 */
-
-function RoadMapNode(x, y, color, name, imageId) // ----This is the node class----
+function RoadMapNode(x, y, color, imageId)
 {
-	Entity.call(this, x, y, 10, 10, color, entityEnums.ROADMAPNODE);
-	this.nodeImage = document.getElementById(imageId);
+	this.nodeImage = document.getElementById(imageId+"-icon");
 	this.color = color;
 	this.offsetX = 0;
 	this.offsetY = 0;
-	this.name = name;
+	this.offsetX = 0;
+	this.offsetY = 0;
 	this.clicked = false;
 	this.map = new RoadMap([], []);
 	this.hovering = false;
-	this.offsetSpaceX = 0;
-	this.offsetSpaceY = 0;
-	this.info = CompoundEnums[imageId];
+	this.info = imageId;
 	this.imageTransparancy = 0;
+	
+	/**Screen is an entity with the following initial properties
+			x - Given
+			y - Given
+			height - 10px
+			width - 10px
+			color - Given
+			id - ROADMAPNODE
+	*/
+	Entity.call(this, x, y, 15, 15, color, entityEnums.ROADMAPNODE);
 	
 	const HOVER_TRANSPARANCY = 1;
 	const NONHOVER_TRANSPARANCY = 0;
-	const SMALL_SIZE = 10;
-	const BIG_SIZE = 20;
+	const SMALL_SIZE = 15;
+	const BIG_SIZE = 30;
 	
 	this.draw = function()
 	{
 		context.fillStyle = this.color;	
+		context.strokeStyle = "black";
 		context.beginPath();
 		context.arc((this.x + this.offsetX) * this.map.zoom + this.map.globalOffsetX, (this.y + this.offsetY) * this.map.zoom + this.map.globalOffsetY, this.width * this.map.zoom, this.height * this.map.zoom, 0, 2* Math.PI);
 		context.fill();
+		context.stroke();
 		context.fillStyle = "rgba(255, 255, 255)";
 		context.globalAlpha = this.imageTransparancy;
 		context.fillRect((((this.x + this.offsetX) - (this.nodeImage.width / 2)) * this.map.zoom) + this.map.globalOffsetX, ((this.y + this.offsetY) + (this.nodeImage.height / 2)) * this.map.zoom + this.map.globalOffsetY, this.nodeImage.width * this.map.zoom, this.nodeImage.height * this.map.zoom);
@@ -537,41 +575,57 @@ function RoadMapNode(x, y, color, name, imageId) // ----This is the node class--
 	{
 		if(this.inTheCircle(mouseX, mouseY))
 		{
-			for(var i = 0; i < screen2.entities.length; i++)
+			for(var i = 0; i < screens[0].entities.length; i++)
 			{
-				if(screen2.entities[i].id == "infoscreen")
+				if(screens[0].entities[i].id == "infoscreen")
 				{
-					if(!screen2.entities[i].madeVisible)
+					if(!screens[0].entities[i].madeVisible)
 					{
-						screen2.entities[i].madeVisible = true;
+						screens[0].entities[i].madeVisible = true;
 					}
-					screen2.entities[i].compoundMechanismOrNil = 1;
-					screen2.entities[i].reference = this.info.id;
+					screens[0].entities[i].compoundMechanismOrNil = 1;
+					screens[0].entities[i].reference = document.getElementById(this.info);
 				}
 			}
 		}
 	}
 }
 
-function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
+/**
+	A line that represents a chemical mechanism
+	
+	@param {RoadMap} roadMap - Refers to the map the line comes from
+	@param {Node} nodeFrom - The starting node
+	@param {Node} nodeTo - The ending node
+	@param {int} fromWidth - The width of the line at the from-Node end
+	@param {int} toWidth - The width of the line at the to-Node end
+	@param {String} name - The name of the mechanism
+	@param {Color} color - The color of the line
+	@param {MechanismEnum} info - Any information about the mechanism
+	@param {boolean} isTwoWayReaction - Whether or not there is another reaction that goes the opposite direction
+*/
+function RoadMapLine(nodeFrom, nodeTo, color, name, id, isTwoWayReaction, roadMap)
 {
-	Entity.call(this, -1, -1, 10, 10, color, entityEnums.ROADMAPLINE);
 	this.roadMap = new RoadMap([], []);
 	this.nodeFrom = nodeFrom;
 	this.nodeTo = nodeTo;
 	this.fromWidth = 10;
-	this.toWidth = 10;
+	this.toWidth = 2;
 	this.name = name;
 	this.color = color;
-	this.info = MechanismEnums[id];
+	this.info = id;
+	this.isTwoWayReaction = isTwoWayReaction;
+	Entity.call(this, -1, -1, 10, 10, color, entityEnums.ROADMAPLINE);
 	
 	this.textAlpha = 1.0;
 	this.selected = false;
 	this.map = new RoadMap([], []);
 	const TEXT_ALPHA_BIG = 1.0;
 	const TEXT_ALPHA_SMALL = 0.0;
-	const WIDTH_BIG = 20;
-	const WIDTH_SMALL = 10;
+	const WIDTH_FROM_BIG = 18;
+	const WIDTH_FROM_SMALL = 10;
+	const WIDTH_TO_BIG = 4;
+	const WIDTH_TO_SMALL = 2;
 	
 	this.draw = function()
 	{
@@ -584,6 +638,7 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 		var heightDiff = toY - fromY;
 		
 		var deg = Math.atan(heightDiff / widthDiff);
+		
 		this.makeLine();
 		
 		//Creates the text
@@ -591,12 +646,26 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 		{
 			context.translate((fromX + toX) / 2 * this.map.zoom + this.map.globalOffsetX, (fromY + toY) / 2 * this.map.zoom + this.map.globalOffsetY);
 			context.rotate(deg);
-			context.translate(0, -20);
+			if(this.isTwoWayReaction && widthDiff < 0)
+			{
+				context.translate(0, (20 * this.map.zoom));
+			}
+			else
+			{
+				context.translate(0, -13 * this.map.zoom);
+			}
 			context.font = "12px Tahoma";
 			context.fillStyle = "rgb(0, 0, 0)";
 			context.textAlign = "center";
 			context.fillText(this.name, 0, 0);
-			context.translate(0, 20);
+			if(this.isTwoWayReaction && widthDiff < 0)
+			{
+				context.translate(0, -20 * this.map.zoom);
+			}
+			else
+			{
+				context.translate(0, 13 * this.map.zoom);
+			}
 			context.rotate(-deg);
 			context.translate(-(fromX + toX) / 2 * this.map.zoom - this.map.globalOffsetX, -(fromY + toY) / 2 * this.map.zoom - this.map.globalOffsetY);
 			
@@ -619,23 +688,31 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 	{
 		if(!this.nodeFrom.hovering && !this.nodeTo.hovering)
 		{
-			if(this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_BIG || this.toWidth != WIDTH_BIG))
+			if(this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_FROM_BIG || this.toWidth != WIDTH_TO_BIG))
 			{
-				var sizeChange = WIDTH_BIG - this.fromWidth;
-				this.fromWidth = this.fromWidth + sizeChange / 2;
-				this.toWidth = this.toWidth + sizeChange / 2;
+				var sizeChangeFrom = WIDTH_FROM_BIG - this.fromWidth;
+				var sizeChangeTo = WIDTH_TO_BIG - this.toWidth;
+				this.fromWidth = this.fromWidth + sizeChangeFrom / 4;
+				this.toWidth = this.toWidth + sizeChangeTo / 4;
 			}
-			else if(!this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL))
+			else if(!this.cursorOver(mouseX, mouseY) && (this.fromWidth != WIDTH_FROM_SMALL || this.toWidth != WIDTH_TO_SMALL))
 			{
-				var sizeChange = this.fromWidth - WIDTH_SMALL;
-				this.fromWidth = this.fromWidth - sizeChange / 2;
-				this.toWidth = this.toWidth - sizeChange / 2;
+				var sizeChange1 = this.fromWidth - WIDTH_FROM_SMALL;
+				var sizeChange2 = this.toWidth - WIDTH_TO_SMALL;
+				this.fromWidth = this.fromWidth - sizeChange1 / 4;
+				this.toWidth = this.toWidth - sizeChange2 / 4;
+				
 			}
 		}
-		else if(this.fromWidth != WIDTH_SMALL || this.toWidth != WIDTH_SMALL)
+		else if(this.nodeFrom.hovering)
 		{
-			this.fromWidth = WIDTH_SMALL;
-			this.toWidth = WIDTH_SMALL;
+			var sizeChangeFrom = WIDTH_FROM_BIG - this.fromWidth;
+			this.fromWidth = this.fromWidth + sizeChangeFrom / 4;
+		}
+		else if(this.nodeTo.hovering)
+		{
+			var sizeChangeTo = WIDTH_TO_BIG - this.toWidth;
+			this.toWidth = this.toWidth + sizeChangeTo / 4;
 		}
 	}
 	
@@ -673,8 +750,54 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 		
 		var deg = Math.atan(heightDiff / widthDiff);
 		
+		if(this.isTwoWayReaction)
+		{
+			if(widthDiff != 0 && heightDiff != 0)
+			{
+				if((widthDiff < 0 && heightDiff >= 0) || (widthDiff > 0 && heightDiff > 0))
+				{
+					deg += (Math.PI / 2);
+				}
+				else
+				{
+					deg -= (Math.PI / 2);
+				}
+				fromX += 7 * Math.sin(deg);
+				fromY += 7 * Math.cos(deg);
+				toX += 7 * Math.sin(deg);
+				toY += 7 * Math.cos(deg);
+				
+				if((widthDiff < 0 && heightDiff > 0) || (widthDiff > 0 && heightDiff > 0))
+				{
+					deg -= (Math.PI / 2);
+				}
+				else
+				{
+					deg += (Math.PI / 2);
+				}	
+			}
+			else
+			{
+				var Xadd = 7 * widthDiff / Math.abs(widthDiff);
+				var Yadd = 7 * heightDiff / Math.abs(heightDiff);
+				
+				console.log(Xadd, Yadd);
+				if(!isNaN(Xadd))
+				{
+					fromY += Xadd;
+					toY += Xadd;
+				}
+				
+				if(!isNaN(Yadd))
+				{
+					fromX += Yadd;
+					toX += Yadd;
+				}
+			}
+		}
+		
 		//Makes the actual line
-		context.lineWidth = 5;
+		context.lineWidth = 2;
 		context.strokeStyle = this.color;
 		context.fillStyle = this.color;
 		context.beginPath();
@@ -702,22 +825,39 @@ function RoadMapLine(nodeFrom, nodeTo, color, name, id, roadMap)
 	{
 		if(this.cursorOver(mouseX, mouseY) && !this.nodeTo.hovering && !this.nodeFrom.hovering)
 		{
-			for(var i = 0; i < screen2.entities.length; i++)
+			for(var i = 0; i < screens[0].entities.length; i++)
 			{
-				if(screen2.entities[i].id == "infoscreen")
+				if(screens[0].entities[i].id == "infoscreen")
 				{
-					if(!screen2.entities[i].madeVisible)
+					if(!screens[0].entities[i].madeVisible)
 					{
-						screen2.entities[i].madeVisible = true;
+						screens[0].entities[i].madeVisible = true;
 					}
-					screen2.entities[i].compoundMechanismOrNil = 2;
-					screen2.entities[i].reference = this.info.id;
+					screens[0].entities[i].compoundMechanismOrNil = 2;
+					console.log(this.info);
+					console.log(document.getElementById(this.info));
+					screens[0].entities[i].reference = document.getElementById(this.info);
 				}
 			}
 		}
 	}
 }
 
+
+/**
+	The system of nodes and lines that make up the Chemistree
+	
+	@param {Node[]} nodes - The nodes of the road map
+	@param {int} numberOfNodes - The number of nodes the road map has
+	@param {Line[]} lines - The lines of the road map
+	@param {int} numberOfLines - The number of lines the road map has
+	@param {double} zoom - How zoomed in the road map is
+		0.1 <= zoom <= 5
+	@param {int} globalOffsetX - The x-coord offset of the offset of the road map
+	@param {int} globalOffsetY - The y-coord offset of the offset of the road map
+	@param {int} startGlobalOffsetX - A placeholder for the x-coord globalOffset
+	@param {int} startGlobalOffsetY - A placeholder for the y-coord globalOffset
+*/
 function RoadMap(nodes, lines)
 {
 	Entity.call(this, -1, -1, -1, -1, "Pink", entityEnums.ROADMAP);
@@ -819,47 +959,76 @@ function RoadMap(nodes, lines)
 	}
 }
 
-/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-  =            This section is for the info section              =
-  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+function CreditsScreen()
+{
+	Entity.call(this, 0, -720, 1080, 720, null, entityEnums.CREDITSSCREEN);
+	this.creditsImage = document.getElementById("Chemistree-Credits");
+	this.offsetY = this.width;
+	this.targetY = this.y;
+	console.log(this.y);
+	
+	this.draw = function()
+	{
+		context.fillRect(this.x, this.y, this.width, this.height);
+		context.drawImage(this.creditsImage, this.x, this.y);
+		
+	}
+	
+	this.update = function(mouseX, mouseY, mouseOut)
+	{
+		if(this.y != this.targetY)
+		{
+			var difference = -this.targetY - this.y;
+			var change = difference / 6;
+			this.y += change;
+			console.log(this.y);
+		}
+	}
+		
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
+}
+
+/**
+	A bar that shows information about a compound or mechanism
+	
+	@param {boolean} madeVisible - Whether or not the info screen should be toggled on
+	@param {int} compoundMechanismOrNil - Determines whether a compound, mechanism, or neither is being displayed
+		1 - Compound
+		2 - Mechanism
+		3 - Intro
+	@param {image} infoImage - The image of the compound or mechanism being displayed
+	@param {id} reference - What compound or mechanism is being displayed
+	
+	@const {int} INVISIBLEX - The target x-coord when toggled on
+		:1080
+	@const {int} VISIBLEX - The target x-coord when toggled off
+		:1080 - width of the screen
 */
 
 function InfoScreen(height, width, line)
 {
 	Entity.call(this, width - 400, 25, 400, height - 25, "#add285", entityEnums.INFOSCREEN);
-	this.madeVisible = true;
-	this.compoundMechanismOrNil = 3; // Compound - 1 | Mechanism - 2 | Nil - 3
-	this.reference = "";
 	
+	this.madeVisible = true;
+	this.compoundMechanismOrNil = 3;
+	this.infoImage = "";
+	this.reference = "";
 	this.INVISIBLEX = 1080;
 	this.VISIBLEX = 1080 - this.width;
+	this.offsetY = 0;
 	
 	this.draw = function()
 	{
 		context.fillStyle = "#4a7821";
 		context.fillRect(this.x, this.y, this.width, this.height);
-		if(this.compoundMechanismOrNil == 1)
+		if(this.compoundMechanismOrNil <= 2)
 		{
-			context.font = "40px Century Gothic";
-			context.fillStyle = "black";
-			context.textAlign = "left";
-			context.fillText(CompoundEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
-			var compoundImage = document.getElementById(this.reference);
-			context.drawImage(compoundImage, this.x + 10, this.y + 70);
-			context.font = "15px Century Gothic";
-			context.fillText("IUPAC Name: " + CompoundEnums[this.reference].IUPACName, this.x + 10, this.y + 90 + compoundImage.height);
-			context.fillText("Molecular Weight: " + CompoundEnums[this.reference].molecularWeight, this.x + 10, this.y + 110 + compoundImage.height);
-			context.fillText("Melting Point: " + CompoundEnums[this.reference].meltingPoint, this.x + 10, this.y + 130 + compoundImage.height);
-			context.fillText("Boiling Point: " + CompoundEnums[this.reference].boilingPoint, this.x + 10, this.y + 150 + compoundImage.height);
-		}
-		else if(this.compoundMechanismOrNil == 2)
-		{
-			context.font = "40px Century Gothic";
-			context.fillStyle = "black";
-			context.textAlign = "left";
-			context.fillText(MechanismEnums[this.reference].commonName, this.x + 10, this.y + 50, this.width - 20);
-			var mechanismImage = document.getElementById(this.reference);
-			context.drawImage(mechanismImage, this.x + 10, this.y + 70);
+			var mechanismImage = this.reference;
+			var proportion = 400 / mechanismImage.width;
+			context.drawImage(mechanismImage, this.x, this.y, Math.floor(mechanismImage.width * proportion), Math.floor(mechanismImage.height * proportion));
 		}
 		else if(this.compoundMechanismOrNil == 3)
 		{
@@ -928,6 +1097,30 @@ function InfoScreen(height, width, line)
 	{
 		this.madeVisible = !this.madeVisible;
 	}
+}
+
+function Legend(height)
+{
+	Entity.call(this, 20, height - 320, 200, 300, "red", entityEnums.LEGEND);
+	this.enabled = true;
+	
+	this.draw = function()
+	{
+		context.fillStyle = "rgba(200, 200, 200, 0.5)";
+		context.fillRect(this.x, this.y, this.width, this.height);
+		var temp = document.getElementById("Legend");
+		context.drawImage(temp, this.x, this.y, this.width, this.height);
+	}
+	
+	this.update = function(mouseX, mouseY, mouseOut){
+		
+	}
+	
+	this.clickUpdate = function(mouseX, mouseY)
+	{
+		
+	}
+	
 }
 
 setInterval(draw, 50);
